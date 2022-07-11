@@ -1,0 +1,30 @@
+{
+  "input": {
+    "device": -1,
+    "sampleRate": 16000,
+    "frameTime": 0.05
+  },
+
+  "vad": {
+    "mode": 3
+  },
+
+    "ns": {
+      "level": 3
+    },
+
+    "framing": {
+      "length": 0.05,
+      "shift": 0.01
+    },
+
+    "windowing": {
+      "type": "provey"
+    },
+
+    "feature": {
+      "type": "mfcc",
+      "preemphesis": 0.95,
+      "dither": false
+    }
+  }
