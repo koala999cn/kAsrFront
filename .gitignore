@@ -1,3 +1,7 @@
 ﻿/.vs
 /lib
 /x64
+/bin
+/*.bat
+/test/voicepicker_test/x64/Debug
+/test/feature_test/x64/Debug

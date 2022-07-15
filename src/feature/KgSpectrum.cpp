@@ -3,12 +3,12 @@
 #include "KtuMath.h"
 
 
-KgSpectrum::KgSpectrum(unsigned frameSize)
-	: roundToPower2_(true)
-	, type_(k_power)
-	, floor_(1e-12f) // TODO: 重新设置
+KgSpectrum::KgSpectrum(unsigned frameSize, double sampleRate, KeNormMode norm)
+	: type_(k_power)
+	, norm_(norm)
+	, f_(sampleRate)
 {
-	rdft_ = new KgRdft(frameSize); // TODO: 处理roundToPower2_
+	rdft_ = new KgRdft(frameSize, false, k_norm_default == norm);
 }
 
 
@@ -41,20 +41,30 @@ void KgSpectrum::porcess(double* data) const
 	rdft->forward(data);
 	rdft->powerSpectrum(data); // 功率谱
 
-	// 转换为其他类型谱
-	auto c = rdft->sizeT();
+	using kMath = KtuMath<double>;
+	auto c = rdft->sizeF();
+
+	// 归一化
+	if (norm_ == k_norm_praat)
+		kMath::scale(data, c, 1 / (f_ * f_));
+	else if (norm_ == k_norm_kaldi) {
+		auto int16_max = std::numeric_limits<std::int16_t>::max();
+		kMath::scale(data, c, int16_max * int16_max);
+	}
+	else if (norm_ == k_norm_default) {
+		; // KgRdft实现
+	}
+
+	// 视情转换为其他类型谱
 	if (type_ == k_mag) {
-		for (unsigned n = 0; n < c; n++)
-			data[n] = sqrt(data[n]);
+		kMath::forEach(data, c, [](double x) { return std::sqrt(x); });
 	}
 	else if (type_ == k_log) {
-		KtuMath<double>::applyFloor(data, c, floor_);
-		KtuMath<double>::applyLog(data, c);
+		kMath::applyFloor(data, c, std::numeric_limits<double>::epsilon());
+		kMath::applyLog(data, c);
 	}
 	else if (type_ == k_db) {
-		for (unsigned n = 0; n < c; n++) {
-			data[n] = std::max(data[n], floor_);
-			data[n] = 10 * log10(data[n]);
-		}
+		kMath::applyFloor(data, c, std::numeric_limits<double>::epsilon());
+		kMath::forEach(data, c, [](double x) { return 10 * std::log10(x); });
 	}
 }

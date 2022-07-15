@@ -1,0 +1,1 @@
+compute-spectrogram-feats --frame-length=9812.5 --frame-shift=9812.5 --dither=0  --preemphasis-coefficient=0 --raw-energy=false --remove-dc-offset=false --round-to-power-of-two=false --snip-edges=false  --window-type="rectangular" scp,p:test.scp ark,t:spectrum-kaldi-plain.txt

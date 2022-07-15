@@ -97,15 +97,16 @@ KcVoicePicker::~KcVoicePicker(void)
 
 bool KcVoicePicker::listen(unsigned sampleRate, unsigned device, float frameTime, int vadMode, voice_handler handler)
 {
-	stop();
-
-	if (   sampleRate != 8000 
-		&& sampleRate != 16000 
-		&& sampleRate != 32000 
-		&& sampleRate != 48000 )
+	if (sampleRate != 8000
+		&& sampleRate != 16000
+		&& sampleRate != 32000
+		&& sampleRate != 48000)
 		return false;
 
 	auto d = (kPrivate::KpVoicePickerImpl_*)dptr_;
+
+	if(d->device->running())
+	    stop();
 
 	if (device == -1)
 		device = d->device->defaultInput();

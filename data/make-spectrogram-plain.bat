@@ -1,0 +1,1 @@
+compute-spectrogram-feats --dither=0  --preemphasis-coefficient=0 --raw-energy=false --remove-dc-offset=false --round-to-power-of-two=false --snip-edges=false  --window-type="rectangular" scp,p:test.scp ark,t:spectrogram-plain.scp

@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="资源文件">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\capture\KcAudioDevice.cpp">
@@ -24,19 +20,31 @@
     <ClCompile Include="src\KgAsrFrontFrame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\capture\KcVoicePicker.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\feature\KgSpectrum.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\KgRdft.cpp">
+    <ClCompile Include="src\base\KgFftw.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\feature\KgPreprocess.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\feature\KgFbank.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\KuFreqUnit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\KuStrUtil.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\KgRdft.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\feature\KgSpectrogram.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,10 +70,34 @@
     <ClInclude Include="src\feature\KgSpectrum.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\KgRdft.h">
+    <ClInclude Include="src\base\KgFftw.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\KgPreprocess.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgFbank.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\KtFraming.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\KtInterval.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\KuFreqUnit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\KtuMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\KuStrUtil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\KgRdft.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgSpectrogram.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

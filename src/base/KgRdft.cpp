@@ -9,9 +9,9 @@
 #define PRAAT_TABLE ((autoNUMfft_Table*)internalTable_)
 
 
-KgRdft::KgRdft(unsigned sizeT, bool kaldiCompat, bool normalize) 
+KgRdft::KgRdft(unsigned sizeT, bool compatNR, bool normalize)
     : sizeT_(sizeT)
-    , kaldiCompat_(kaldiCompat)
+    , compatNR_(compatNR)
     , normalize_(normalize)
 {
     internalTable_ = new autoNUMfft_Table;
@@ -30,7 +30,7 @@ void KgRdft::forward(double data[]) const
 {
     ::NUMfft_forward(PRAAT_TABLE, data);
 
-    if(kaldiCompat_) { // 调整结果布局，以兼容NR fft
+    if(compatNR_) { // 调整结果布局，以兼容NR fft
         if (sizeT() > 1) {
             // To be compatible with old behaviour
             double tmp = data[sizeT() - 1];
@@ -44,7 +44,7 @@ void KgRdft::forward(double data[]) const
 
 void KgRdft::backward(double data[]) const
 {
-    if(kaldiCompat_) {
+    if(compatNR_) {
         if (sizeT() > 1) {
             // To be compatible with old behaviour
             double tmp = data[1];
@@ -61,6 +61,23 @@ void KgRdft::backward(double data[]) const
         KtuMath<double>::scale(data, sizeT(), static_cast<double>(1.0 / sizeT()));
 }
 
+std::pair<double, double> KgRdft::unpack(const double* fft, unsigned idx) const
+{
+    assert(idx < sizeF());
+
+    if (idx == 0)
+        return { fft[0], 0 };
+    else if (idx == sizeT() / 2) {
+        if (!compatNR_) return { fft[sizeT() - 1], 0 };
+        else return { fft[1], 0 };
+    }
+
+    if (!compatNR_)
+        return { fft[idx * 2 - 1], fft[idx * 2] };
+    else
+        return { fft[idx * 2], fft[idx * 2 + 1] };
+}
+
 void KgRdft::powerSpectrum(const double *fft/*in*/, double* spec/*out*/) const
 {
     // now we have in waveform, first half of complex spectrum
@@ -70,7 +87,7 @@ void KgRdft::powerSpectrum(const double *fft/*in*/, double* spec/*out*/) const
 
     spec[0] = fft[0] * fft[0]; // first_energy
 
-    if(!kaldiCompat_) {
+    if(!compatNR_) {
         for (decltype(half_dim) i = 1; i < half_dim; i++) {
             double real = fft[i * 2 - 1], im = fft[i * 2];
             spec[i] = real * real + im * im;
@@ -92,9 +109,11 @@ void KgRdft::powerSpectrum(const double *fft/*in*/, double* spec/*out*/) const
     }
 
     if (normalize_) {
-        KtuMath<double>::forEach(spec, sizeF(), [](double x) { return std::sqrt(x); });
-        KtuMath<double>::scale(spec, sizeF(), static_cast<double>(2.0 / sizeT()));
-        spec[0] /= 2;
+        // KtuMath<double>::forEach(spec, sizeF(), [](double x) { return std::sqrt(x); });
+        // KtuMath<double>::scale(spec, sizeF(), static_cast<double>(2.0 / sizeT()));
+        // spec[0] /= 2;
+        KtuMath<double>::scale(spec, sizeF(), static_cast<double>(4.0 / sizeT() / sizeT()));
+        spec[0] /= 4;
     }
 }
 

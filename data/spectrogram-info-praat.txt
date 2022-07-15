@@ -1,0 +1,21 @@
+Object id: 2
+Object type: Spectrogram
+Object name: test
+Date: Tue Jul 12 17:35:34 2022
+
+Time domain:
+   Start time: 0 seconds
+   End time: 9.8125 seconds
+   Total duration: 9.8125 seconds
+Time sampling:
+   Number of time slices (frames): 979
+   Time step (frame distance): 0.01 seconds
+   First time slice (frame centre) at: 0.01625000000000017 seconds
+Frequency domain:
+   Lowest frequency: 0 Hz
+   Highest frequency: 8000 Hz
+   Total bandwidth: 8000 Hz
+Frequency sampling:
+   Number of frequency bands (bins): 512
+   Frequency step (bin width): 15.625 Hz
+   First frequency band around (bin centre at): 0 Hz

@@ -13,12 +13,12 @@ namespace kPrivate
 }
 
 
-KgPreprocess::KgPreprocess(const KpOption& option, frame_handler handler)
-    : opts_(option)
+KgPreprocess::KgPreprocess(const KpOptions& opts, frame_handler handler)
+    : opts_(opts)
     , handler_(handler)
 {
     auto d = new kPrivate::KgPreprocessInternal_;
-    d->framing = new KtFraming<double>(opts_.frameLength, 1, opts_.frameShift);
+    d->framing = new KtFraming<double>(opts_.frameSize, 1, opts_.frameShift);
     dptr_ = d;
 }
 
@@ -49,32 +49,32 @@ void KgPreprocess::flush() const
 
 void KgPreprocess::processOneFrame_(const double* frame) const
 {
-    std::vector<double> newData(opts_.frameLength);
+    std::vector<double> newData(opts_.frameSize);
     std::copy(frame, frame + newData.size(), newData.begin());
     double* frame_data = newData.data();
-    auto frame_length = newData.size();
+    auto frame_size = newData.size();
 
     if (opts_.dither != 0)
         ; // TODO: DO dithering
 
     if (opts_.removeDcOffset)
-        KtuMath<double>::subMean(frame_data, frame_length);
+        KtuMath<double>::subMean(frame_data, frame_size);
 
     double energy(0);
-    if (opts_.useEnergy && opts_.rawEnergy)
-        energy = std::max(opts_.energyFloor, KtuMath<double>::dot(frame_data, frame_data, frame_length));
+    if (opts_.energyMode == 1)
+        energy = KtuMath<double>::sum2(frame_data, frame_size);
 
     if (opts_.preemphasis != 0.0)
         ; // TODO: KuFilter::PreEmphasize(frame_data, frame_length, opts.dbPreemphCoeff);
 
     auto d = (kPrivate::KgPreprocessInternal_*)dptr_;
     if (!d->window.empty()) {
-        assert(frame_length == d->window.size());
-        KtuMath<double>::mul(frame_data, d->window.data(), frame_data, frame_length);
+        assert(frame_size == d->window.size());
+        KtuMath<double>::mul(frame_data, d->window.data(), frame_data, frame_size);
     }
 
-    if (opts_.useEnergy && !opts_.rawEnergy)
-        energy = std::max(opts_.energyFloor, KtuMath<double>::dot(frame_data, frame_data, frame_length));
+    if (opts_.energyMode == 2)
+        energy = KtuMath<double>::sum2(frame_data, frame_size);
 
     handler_(frame_data, energy);
 }
