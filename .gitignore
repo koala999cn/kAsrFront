@@ -5,3 +5,5 @@
 /*.bat
 /test/voicepicker_test/x64/Debug
 /test/feature_test/x64/Debug
+*.vcxproj.filters
+.vcxproj.user
