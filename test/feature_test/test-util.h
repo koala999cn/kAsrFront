@@ -14,4 +14,6 @@ void equal_test(const matrixd& m1, const matrixd& m2, double refTol = 0.001);
 
 void dump_bias(const vectord& v1, const vectord& v2);
 
+void dump_bias(const matrixd& m1, const matrixd& m2);
+
 vectord get_column(const matrixd& m, int col);

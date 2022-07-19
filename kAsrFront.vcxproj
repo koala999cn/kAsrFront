@@ -97,6 +97,7 @@
       <PreprocessorDefinitions> _CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)3rdparty;$(SolutionDir)src;$(SolutionDir)src/base;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +119,7 @@
       <PreprocessorDefinitions> _CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)3rdparty;$(SolutionDir)src;$(SolutionDir)src/base;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +141,7 @@
       <PreprocessorDefinitions> _CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)3rdparty;$(SolutionDir)src;$(SolutionDir)src/base;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,7 +151,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>rtaudiod.lib;voixen-vadd.lib;libfftw3-3.lib;</AdditionalDependencies>
+      <AdditionalDependencies>rtaudiod.lib;voixen-vadd.lib;</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -160,6 +163,7 @@
       <PreprocessorDefinitions> _CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)3rdparty;$(SolutionDir)src;$(SolutionDir)src/base;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -171,17 +175,18 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>rtaudio.lib;voixen-vad.lib;libfftw3-3.lib;</AdditionalDependencies>
+      <AdditionalDependencies>rtaudio.lib;voixen-vad.lib;</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\base\KgFftw.cpp" />
     <ClCompile Include="src\base\KgRdft.cpp" />
     <ClCompile Include="src\base\KuFreqUnit.cpp" />
     <ClCompile Include="src\base\KuStrUtil.cpp" />
     <ClCompile Include="src\capture\KcAudioDevice.cpp" />
     <ClCompile Include="src\capture\KcVoicePicker.cpp" />
+    <ClCompile Include="src\capture\KgPreemphasis.cpp" />
     <ClCompile Include="src\capture\KgVoixenVad.cpp" />
+    <ClCompile Include="src\capture\KgWindowing.cpp" />
     <ClCompile Include="src\feature\KgFbank.cpp" />
     <ClCompile Include="src\feature\KgPreprocess.cpp" />
     <ClCompile Include="src\feature\KgSpectrogram.cpp" />
@@ -189,7 +194,6 @@
     <ClCompile Include="src\KgAsrFrontFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\base\KgFftw.h" />
     <ClInclude Include="src\base\KgRdft.h" />
     <ClInclude Include="src\base\KtFraming.h" />
     <ClInclude Include="src\base\KtInterval.h" />
@@ -199,7 +203,9 @@
     <ClInclude Include="src\base\KuStrUtil.h" />
     <ClInclude Include="src\capture\KcAudioDevice.h" />
     <ClInclude Include="src\capture\KcVoicePicker.h" />
+    <ClInclude Include="src\capture\KgPreemphasis.h" />
     <ClInclude Include="src\capture\KgVoixenVad.h" />
+    <ClInclude Include="src\capture\KgWindowing.h" />
     <ClInclude Include="src\capture\KuAudioUtil.h" />
     <ClInclude Include="src\feature\KgFbank.h" />
     <ClInclude Include="src\feature\KgPreprocess.h" />

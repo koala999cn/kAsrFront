@@ -7,3 +7,4 @@
 /test/feature_test/x64/Debug
 *.vcxproj.filters
 .vcxproj.user
+/old

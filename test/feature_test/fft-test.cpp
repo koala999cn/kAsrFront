@@ -29,11 +29,11 @@ void fft_test(const std::vector<double>& wav)
 
     printf("  test with fftw...  ");
     auto fftw = load_matrix("../data/fft-fftw3.txt"); // 数据布局：re[0], im[0], re[1], im[1], ...
-    if (fftw.size() != rdft.sizeF() * 2) {
-        printf("fft-fftw2.txt missing or corupt.");
+    if (fftw.size() != rdft.odim() * 2) {
+        printf("fft-fftw3.txt missing or corupt.");
         test_failed();
     }
-    for (unsigned i = 0; i < rdft.sizeF(); i++) {
+    for (unsigned i = 0; i < rdft.odim(); i++) {
         auto spec = rdft.unpack(data.data(), i);
         if (!KtuMath<double>::almostEqualRel(spec.first, fftw[2 * i].front()) ||
             !KtuMath<double>::almostEqualRel(spec.second, fftw[2 * i + 1].front())) {
@@ -47,17 +47,17 @@ void fft_test(const std::vector<double>& wav)
 
     printf("  test with praat...  ");
     auto praat = load_matrix("../data/fft-praat.txt"); // 数据布局：re[0], re[0], ..., im[0], im[1], ...
-    if (praat.size() != rdft.sizeF() * 2) {
+    if (praat.size() != rdft.odim() * 2) {
         printf("fft-praat.txt missing or corupt.");
         test_failed();
     }
-    for (unsigned i = 0; i < rdft.sizeF(); i++) {
+    for (unsigned i = 0; i < rdft.odim(); i++) {
         auto spec = rdft.unpack(data.data(), i);
         // 数据相差sampleRate倍数
         if (!KtuMath<double>::almostEqualRel(spec.first / 16000, praat[i].front()) ||
-            !KtuMath<double>::almostEqualRel(spec.second / 16000, praat[i + rdft.sizeF()].front())) {
+            !KtuMath<double>::almostEqualRel(spec.second / 16000, praat[i + rdft.odim()].front())) {
             printf("spec[%d] mismatch: <%f, %f> vs <%f, %f>",
-                i, spec.first/16000, spec.second/16000, praat[i].front(), praat[i + rdft.sizeF()].front());
+                i, spec.first/16000, spec.second/16000, praat[i].front(), praat[i + rdft.odim()].front());
             test_failed();
         }
     }

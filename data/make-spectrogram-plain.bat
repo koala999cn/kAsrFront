@@ -1,1 +1,1 @@
-compute-spectrogram-feats --dither=0  --preemphasis-coefficient=0 --raw-energy=false --remove-dc-offset=false --round-to-power-of-two=false --snip-edges=false  --window-type="rectangular" scp,p:test.scp ark,t:spectrogram-plain.scp
+compute-spectrogram-feats --dither=0  --preemphasis-coefficient=0 --energy-floor=1 --raw-energy=true --remove-dc-offset=false --round-to-power-of-two=false --snip-edges=true  --window-type="rectangular" scp,p:test.scp ark,t:spectrogram-kaldi-plain.txt

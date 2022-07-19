@@ -1,0 +1,1 @@
+compute-spectrogram-feats --dither=0  --preemphasis-coefficient=0.97 --energy-floor=1 --raw-energy=false --remove-dc-offset=true --round-to-power-of-two=true --snip-edges=true  --window-type=povey  scp,p:test.scp ark,t:spectrogram-kaldi-prep.txt

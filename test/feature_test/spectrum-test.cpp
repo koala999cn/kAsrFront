@@ -11,7 +11,7 @@ void spectrum_test(const std::vector<double>& wav)
 	spec.setType(KgSpectrum::k_power); // praat为power谱
 	auto data = wav;
 	spec.porcess(data.data());
-	data.resize(spec.dim().second);
+	data.resize(spec.odim());
 	
 	printf("  test with praat...  ");
 	auto praat = load_matrix("../data/spectrum-praat.txt");
@@ -28,7 +28,7 @@ void spectrum_test(const std::vector<double>& wav)
 		KgSpectrum spec1(wav.size(), 16000, KgSpectrum::k_norm_kaldi);
 		spec1.setType(KgSpectrum::k_log); // kaldi为log谱
 		spec1.porcess(data.data());
-		data.resize(spec1.dim().second);
+		data.resize(spec1.odim());
 	}
 	data[0] = std::log(energy * std::numeric_limits<std::int16_t>::max() * std::numeric_limits<std::int16_t>::max()); // 按kaldi模式修正spec[0]
 	printf("  test with kaldi plain...  ");

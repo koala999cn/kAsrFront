@@ -18,17 +18,22 @@ KgSpectrum::~KgSpectrum()
 }
 
 
-std::pair<unsigned, unsigned> KgSpectrum::dim() const
+unsigned KgSpectrum::idim() const
 {
-	auto rdft = ((KgRdft*)rdft_);
-	return { rdft->sizeT(), rdft->sizeF() };
+	return ((KgRdft*)rdft_)->idim();
+}
+
+
+unsigned KgSpectrum::odim() const
+{
+	return ((KgRdft*)rdft_)->odim();
 }
 
 
 void KgSpectrum::reset(unsigned frameSize)
 {
 	auto rdft = ((KgRdft*)rdft_);
-	if (rdft->sizeT() != frameSize) {
+	if (rdft->idim() != frameSize) {
 		delete rdft;
 		rdft_ = new KgRdft(frameSize);
 	}
@@ -42,7 +47,7 @@ void KgSpectrum::porcess(double* data) const
 	rdft->powerSpectrum(data); // 功率谱
 
 	using kMath = KtuMath<double>;
-	auto c = rdft->sizeF();
+	auto c = rdft->odim();
 
 	// 归一化
 	if (norm_ == k_norm_praat)

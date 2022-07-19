@@ -1,24 +1,35 @@
 ﻿#include "KgPreprocess.h"
+#include <memory>
 #include "KtFraming.h"
 #include "KtuMath.h"
+#include "capture/KgPreemphasis.h"
+#include "capture/KgWindowing.h"
 
 
 namespace kPrivate
 {
     struct KgPreprocessInternal_
     {
-        KtFraming<double>* framing;
-        std::vector<double> window;
+        std::unique_ptr<KtFraming<double>> framing;
+        std::unique_ptr<KgPreemphasis> preemphasis;
+        std::unique_ptr<KgWindowing> windowing;
     };
 }
 
 
-KgPreprocess::KgPreprocess(const KpOptions& opts, frame_handler handler)
+KgPreprocess::KgPreprocess(const KpOptions& opts)
     : opts_(opts)
-    , handler_(handler)
 {
     auto d = new kPrivate::KgPreprocessInternal_;
-    d->framing = new KtFraming<double>(opts_.frameSize, 1, opts_.frameShift);
+    d->framing = std::make_unique<KtFraming<double>>(opts_.frameSize, 1, opts_.frameShift);
+
+    if (opts.preemphasis != 0.0)
+        d->preemphasis = std::make_unique<KgPreemphasis>(opts_.frameSize, opts_.preemphasis);
+
+    if (opts.windowType != KgWindowing::k_rectangle)
+        d->windowing = std::make_unique<KgWindowing>(opts.frameSize, 
+            KgWindowing::KeType(opts.windowType), opts.windowArg);
+
     dptr_ = d;
 }
 
@@ -29,52 +40,52 @@ KgPreprocess::~KgPreprocess()
 }
 
 
-void KgPreprocess::process(const double* buf, unsigned len) const
+void KgPreprocess::process(const double* buf, unsigned len, frame_handler fh) const
 {
     auto d = (kPrivate::KgPreprocessInternal_*)dptr_;
-    d->framing->apply(buf, buf + len, [this](const double* frame) {
-        processOneFrame_(frame);
+    d->framing->apply(buf, buf + len, [this, fh](const double* frame) {
+        std::vector<double> out(odim());
+        auto e = processOneFrame_(frame, out.data());
+        fh(out.data(), e);
         });
 }
 
 
-void KgPreprocess::flush() const
+void KgPreprocess::flush(frame_handler fh) const
 {
     auto d = (kPrivate::KgPreprocessInternal_*)dptr_;
-    d->framing->flush([this](const double* frame) {
-        processOneFrame_(frame);
+    d->framing->flush([this, fh](const double* frame) {
+        std::vector<double> out(odim());
+        auto e = processOneFrame_(frame, out.data());
+        fh(out.data(), e);
         });
 }
 
 
-void KgPreprocess::processOneFrame_(const double* frame) const
+double KgPreprocess::processOneFrame_(const double* in, double* out) const
 {
-    std::vector<double> newData(opts_.frameSize);
-    std::copy(frame, frame + newData.size(), newData.begin());
-    double* frame_data = newData.data();
-    auto frame_size = newData.size();
+    std::copy(in, in + odim(), out);
 
     if (opts_.dither != 0)
         ; // TODO: DO dithering
 
     if (opts_.removeDcOffset)
-        KtuMath<double>::subMean(frame_data, frame_size);
+        KtuMath<double>::subMean(out, odim());
 
     double energy(0);
-    if (opts_.energyMode == 1)
-        energy = KtuMath<double>::sum2(frame_data, frame_size);
-
-    if (opts_.preemphasis != 0.0)
-        ; // TODO: KuFilter::PreEmphasize(frame_data, frame_length, opts.dbPreemphCoeff);
+    if (opts_.energyMode == k_energy_raw)
+        energy = KtuMath<double>::sum2(out, odim());
 
     auto d = (kPrivate::KgPreprocessInternal_*)dptr_;
-    if (!d->window.empty()) {
-        assert(frame_size == d->window.size());
-        KtuMath<double>::mul(frame_data, d->window.data(), frame_data, frame_size);
-    }
 
-    if (opts_.energyMode == 2)
-        energy = KtuMath<double>::sum2(frame_data, frame_size);
+    if (d->preemphasis)
+        d->preemphasis->porcess(out);
 
-    handler_(frame_data, energy);
+    if (d->windowing)
+        d->windowing->porcess(out);
+
+    if (opts_.energyMode == k_energy_post)
+        energy = KtuMath<double>::sum2(out, odim());
+
+    return energy;
 }

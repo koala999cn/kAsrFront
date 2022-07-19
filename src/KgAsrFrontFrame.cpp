@@ -66,9 +66,9 @@ namespace kPrivate
 			if (input.contains("sampleRate") && input["sampleRate"].is_number())
 				sampleRate = input["sampleRate"].get<unsigned>();
 
-			unsigned frames = sampleRate * 0.05; // 50ms
+			unsigned frames = static_cast<unsigned>(sampleRate * 0.05); // 50ms
 			if (input.contains("frameTime") && input["frameTime"].is_number())
-				frames = sampleRate * input["frameTime"].get<double>();
+				frames = static_cast<unsigned>(sampleRate * input["frameTime"].get<double>());
 
 			KcAudioDevice::KpStreamParameters iparam;
 			iparam.channels = 1; // always mono

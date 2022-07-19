@@ -26,9 +26,6 @@
     <ClCompile Include="src\feature\KgSpectrum.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\KgFftw.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\feature\KgPreprocess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -45,6 +42,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\feature\KgSpectrogram.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\capture\KgPreemphasis.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\capture\KgWindowing.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,9 +71,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\KgSpectrum.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\KgFftw.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\KgPreprocess.h">
@@ -98,6 +98,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\KgSpectrogram.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\capture\KgPreemphasis.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\capture\KgWindowing.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

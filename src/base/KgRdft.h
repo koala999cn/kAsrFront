@@ -62,10 +62,11 @@ public:
         return powerSpectrum(fft, fft);
     }
 
+    // 输入数据的长度
+    unsigned idim() const { return sizeT_; }
 
-    unsigned sizeT() const { return sizeT_; }
-
-    unsigned sizeF() const { return sizeT() / 2 + 1; }
+    // 输出频谱的长度
+    unsigned odim() const { return idim() / 2 + 1; }
 
 private:
     unsigned sizeT_;

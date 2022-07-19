@@ -31,7 +31,8 @@ public:
 	~KgSpectrum();
 
 	// 返回输入输出的规格
-	std::pair<unsigned, unsigned> dim() const;
+	unsigned idim() const;
+	unsigned odim() const;
 
 	void reset(unsigned frameSize);
 

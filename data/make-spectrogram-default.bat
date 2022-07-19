@@ -1,1 +1,0 @@
-compute-spectrogram-feats scp,p:test.scp ark,t:spectrogram-default.scp

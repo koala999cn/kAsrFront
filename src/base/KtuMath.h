@@ -274,6 +274,14 @@ public:
     template<typename BINARY_OP>
     static void forEach(const KREAL x[], const KREAL y[], KREAL r[], unsigned n, BINARY_OP op);
 
+    /*************** others *****************/
+
+    // 将区间<left, right>等间隔分为olen个点，结果存放到out
+    // @x0ref: 第一个分割点相对(dx)起始位置，x0 = x0ref * dx
+    // @RIGHT_CLOSED: 若true, 则最后一个分割点<=right, 否则<right
+    // @olen: 等分点的数量
+    template<bool RIGHT_CLOSED = true>
+    static void linspace(KREAL left, KREAL right, KREAL x0ref, KREAL* out, unsigned olen);
 
 private:
     KtuMath() { }
@@ -301,10 +309,11 @@ bool KtuMath<KREAL>::almostEqualRel(KREAL x1, KREAL x2, KREAL rel_tol)
 {
     // a==b handles infinities.
     if(x1 == x2) return true;
+    if (x1 == 0 || x2 == 0) return almostEqual(x1, x2, rel_tol); // TODO: 
     double diff = std::abs(x1 - x2);
     if(isUndefined(diff))
         return false;
-    return diff <= rel_tol*(std::abs(x1) +std::abs(x2));
+    return diff <= rel_tol*(std::abs(x1) + std::abs(x2));
 }
 
 template<class KREAL>
@@ -885,4 +894,29 @@ void KtuMath<KREAL>::forEach(const KREAL x[], const KREAL y[], KREAL r[], unsign
     }
     for (; i < n; i++)
         r[i] = op(x[i], y[i]);
+}
+
+
+template<typename KREAL>
+template<bool RIGHT_CLOSED>
+void KtuMath<KREAL>::linspace(KREAL left, KREAL right, KREAL x0ref, KREAL* out, unsigned olen)
+{
+    assert(x0ref >= 0 && x0ref < 1);
+
+    if (olen == 0)
+        return;
+    else if (olen == 1) {
+        *out = left + (right - left) * x0ref;
+        return;
+    }
+
+    auto dx = right - left;
+    if constexpr (RIGHT_CLOSED) {
+        dx /= x0ref == 0 ? olen - 1 : olen;
+    }
+    else
+        dx /= olen;
+
+    for (unsigned i = 0; i < olen; i++)
+        out[i] = left + (x0ref + i) * dx;
 }

@@ -56,6 +56,7 @@ vectord get_column(const matrixd& m, int col)
 
 void make_plain(KgPreprocess::KpOptions& opts)
 {
+    opts.sampleRate = 16000;
     opts.dither = false;
     opts.frameSize = 0.025 * 16000;
     opts.frameShift = 0.01 * 16000;
@@ -131,4 +132,30 @@ void dump_bias(const vectord& v1, const vectord& v2)
     }
     meanBias /= v1.size();
     printf("mean-bais: %f, max-bais: %f at index %d (%f vs %f)\n", meanBias, maxBias, maxIdx, maxVal0, maxVal1);
+}
+
+
+void dump_bias(const matrixd& m1, const matrixd& m2)
+{
+    double maxBias(0), meanBias(0);
+    double maxVal0(0), maxVal1(0);
+    unsigned maxr(0), maxc(0);
+    for (unsigned r = 0; r < m1.size(); r++) {
+        auto& v1 = m1[r];
+        auto& v2 = m2[r];
+        for (unsigned i = 0; i < v1.size(); i++) {
+            double bias = std::abs(v2[i] - v1[i]);
+            if (v2[i] != 0) bias /= std::abs(v2[i]);
+            meanBias += bias;
+            if (bias > maxBias) {
+                maxBias = bias;
+                maxVal0 = v1[i];
+                maxVal1 = v2[i];
+                maxr = r, maxc = i;
+            }
+        }
+    }
+    meanBias /= m1.size() * m1[0].size();
+
+    printf("mean-bais: %f, max-bais: %f at r=%d, c=%d (%f vs %f)\n", meanBias, maxBias, maxr,maxc, maxVal0, maxVal1);
 }
