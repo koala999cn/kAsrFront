@@ -9,6 +9,8 @@ void test_failed();
 void fft_test(const std::vector<double>& wav);
 void spectrum_test(const std::vector<double>& wav);
 void spectrogram_test(const std::vector<double>& wav);
+void fbank_test(const std::vector<double>& wav);
+
 
 static std::vector<double> read_test_wav()
 {
@@ -43,6 +45,7 @@ int main()
     if (wav.empty())
         return 1;
 
+    fbank_test(wav);
     fft_test(wav);
     spectrum_test(wav);
     spectrogram_test(wav);

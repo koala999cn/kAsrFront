@@ -6,8 +6,9 @@
 #include "KtuMath.h"
 
 
-KgFbank::KgFbank(double sampleRate, double df, const KpOptions& opts)
+KgFbank::KgFbank(double sampleRate, unsigned idim, const KpOptions& opts)
     : opts_(opts)
+    , idim_(idim)
 {
     if (opts_.highFreq <= 0)
         opts_.highFreq = sampleRate / 2; // 取奈奎斯特频率
@@ -16,64 +17,27 @@ KgFbank::KgFbank(double sampleRate, double df, const KpOptions& opts)
     assert(opts_.lowFreq >= 0 && opts_.highFreq > opts_.lowFreq);
     assert(opts_.type >= k_linear && opts_.type <= k_erb);
 
-    // Hz尺度的采样参数
-    KtSampling<double> sampHz;
-    sampHz.reset(0, sampleRate / 2, df, 0.5);
-    isize_ = static_cast<unsigned>(sampHz.size()); 
-
-    // 目标(type_)尺度的采样参数
-    auto lowScale = fromHertz_(opts_.lowFreq);
-    auto highScale = fromHertz_(opts_.highFreq);
-    KtSampling<double> sampTy;
-    sampTy.resetn(opts_.numBins + 1, lowScale, highScale, 0); // 在目标尺度上均匀划分各bin，相邻的bin有1/2重叠
-
-    firstIdx_.resize(opts_.numBins);
-    fc_.resize(opts_.numBins);
-    weights_.resize(opts_.numBins);
-    for (unsigned bin = 0; bin < opts_.numBins; bin++) {
-        // 计算目标尺度上的bin参数（左边频率，右边频率，中心频率）
-        auto fl = sampTy.indexToX(bin);
-        auto fc = sampTy.indexToX(bin + 1);
-        auto fr = sampTy.indexToX(bin + 2);
-
-        // 换算到Hertz尺度上保存
-        auto flhz = toHertz_(fl);
-        auto frhz = toHertz_(fr);
-        auto idx = sampHz.rangeToIndex(flhz, frhz);
-        if (idx.first < 0) idx.first = 0;
-        firstIdx_[bin] = idx.first;
-        fc_[bin] = toHertz_(fc);
-
-        if (idx.first < idx.second) {
-            // 计算当前bin的权值数组（目标尺度上的三角滤波）
-            auto factor = 1 / (frhz - flhz);
-            weights_[bin].resize(idx.second - idx.first, 0);
-            for (long i = idx.first; i < idx.second; i++)
-                weights_[bin][i - idx.first] = factor *
-                calcFilterWeight_(fl, fr, fromHertz_(sampHz.indexToX(i)));
-        }
-        else {
-            weights_[bin].clear();
-        }
-    }
+    initWeights_(sampleRate);
 }
 
 
-std::pair<unsigned, unsigned> KgFbank::dim() const
+unsigned KgFbank::idim() const
 {
-    return { isize_, opts_.numBins };
+    return idim_;
+}
+
+
+unsigned KgFbank::odim() const
+{
+    return opts_.numBins;
 }
 
 
 void KgFbank::process(const double* in, double* out)
 {
-    for (unsigned i = 0; i < opts_.numBins; i++) {
-        unsigned N = isize_ > firstIdx_[i] ? 
-            std::min(unsigned(weights_[i].size()), isize_ - firstIdx_[i]) : 0;
-
-        // 若N=0, dot返回0.0
-        out[i] = KtuMath<double>::dot(in + firstIdx_[i], weights_[i].data(), N);
-    }
+    for (unsigned i = 0; i < opts_.numBins; i++) 
+        // 若weights_[i].size() == 0, dot返回0.0
+        out[i] = KtuMath<double>::dot(in + firstIdx_[i], weights_[i].data(), weights_[i].size());
 }
 
 
@@ -102,6 +66,55 @@ double KgFbank::fromHertz_(double hz)
     };
 
     return cvt[opts_.type](hz);
+}
+
+
+void KgFbank::initWeights_(double sampleRate)
+{
+    // Hz尺度的采样参数
+    KtSampling<double> sanpHertz;
+    //sanpHertz.resetn(idim_, 0, sampleRate / 2, 0.5);
+    sanpHertz.resetn(idim_, 0, sampleRate / 2, 0); // 兼容kaldi, x0ref取0
+
+    // 目标(type_)尺度的采样参数
+    auto lowScale = fromHertz_(opts_.lowFreq);
+    auto highScale = fromHertz_(opts_.highFreq);
+    KtSampling<double> sanpScale;
+    sanpScale.resetn(opts_.numBins + 1, lowScale, highScale, 0); // 在目标尺度上均匀划分各bin，相邻的bin有1/2重叠
+
+    firstIdx_.resize(opts_.numBins);
+    fc_.resize(opts_.numBins);
+    weights_.resize(opts_.numBins);
+    for (unsigned bin = 0; bin < opts_.numBins; bin++) {
+
+        // 计算目标尺度上的this_bin的参数（左边频率，右边频率，中心频率）
+        auto fl = sanpScale.indexToX(bin);
+        auto fc = sanpScale.indexToX(bin + 1);
+        auto fr = sanpScale.indexToX(bin + 2);
+
+        // 计算this_bin对应的频点范围
+        auto flhz = toHertz_(fl); 
+        auto frhz = toHertz_(fr);
+        auto lowIdx = sanpHertz.xToHighIndex(flhz);
+        auto highIdx = sanpHertz.xToLowIndex(frhz);
+        lowIdx = std::max(lowIdx, long(0));
+        highIdx = std::min(highIdx, long(idim_ - 1));
+        firstIdx_[bin] = lowIdx;
+        fc_[bin] = toHertz_(fc);
+
+        // 计算this_bin的权值
+        weights_[bin].clear();
+        if (lowIdx <= highIdx) {
+            // 计算当前bin的权值数组（目标尺度上的三角滤波）
+            auto& wt = weights_[bin];
+            wt.resize(highIdx - lowIdx + 1, 0);
+            for (long i = lowIdx; i <= highIdx; i++)
+                wt[i - lowIdx] = calcFilterWeight_(fl, fr, fromHertz_(sanpHertz.indexToX(i)));
+
+            if (opts_.normalize)
+                KtuMath<double>::scale(wt.data(), wt.size(), 1. / (frhz - flhz));
+        }
+    }
 }
 
 

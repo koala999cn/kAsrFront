@@ -198,6 +198,7 @@
     <ClInclude Include="src\base\KtFraming.h" />
     <ClInclude Include="src\base\KtInterval.h" />
     <ClInclude Include="src\base\KtObservable.h" />
+    <ClInclude Include="src\base\KtSampling.h" />
     <ClInclude Include="src\base\KtuMath.h" />
     <ClInclude Include="src\base\KuFreqUnit.h" />
     <ClInclude Include="src\base\KuStrUtil.h" />

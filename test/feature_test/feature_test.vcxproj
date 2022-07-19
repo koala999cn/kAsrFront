@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="fbank-test.cpp" />
     <ClCompile Include="feature-test.cpp" />
     <ClCompile Include="fft-test.cpp" />
     <ClCompile Include="spectrogram-test.cpp" />

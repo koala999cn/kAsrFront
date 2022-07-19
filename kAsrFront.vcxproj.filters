@@ -106,5 +106,8 @@
     <ClInclude Include="src\capture\KgWindowing.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\KtSampling.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

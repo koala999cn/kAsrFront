@@ -4,8 +4,6 @@
 #include "test-util.h"
 
 
-void make_plain(KgPreprocess::KpOptions& opts);
-
 void spectrogram_test(const std::vector<double>& wav)
 {
 	printf(" spectrogram test...  \n");
@@ -20,14 +18,19 @@ void spectrogram_test(const std::vector<double>& wav)
 	};
 
 	KgSpectrogram::KpOptions opts;
-	make_plain(opts);
-
+	opts.sampleRate = 16000;
+	opts.dither = false;
+	opts.frameSize = 0.025 * 16000;
+	opts.frameShift = 0.01 * 16000;
+	opts.preemphasis = 0;
+	opts.removeDcOffset = false;
 	opts.windowType = KgWindowing::k_rectangle;
 	opts.energyMode = KgPreprocess::k_energy_raw;
 	opts.roundToPower2 = false;
-	opts.type = KgSpectrum::k_log;
+	opts.type = KgSpectrum::k_log; // 对于spectrogram，kaldi始终计算log谱
 	opts.norm = KgSpectrum::k_norm_kaldi;
 	opts.energyFloor = 1;
+
 	KgSpectrogram spec(opts);
 	spec_size = spec.odim();
 	spec.process(wav.data(), wav.size(), spec_handler);

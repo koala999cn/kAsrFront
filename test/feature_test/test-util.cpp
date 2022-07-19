@@ -54,28 +54,6 @@ vectord get_column(const matrixd& m, int col)
 }
 
 
-void make_plain(KgPreprocess::KpOptions& opts)
-{
-    opts.sampleRate = 16000;
-    opts.dither = false;
-    opts.frameSize = 0.025 * 16000;
-    opts.frameShift = 0.01 * 16000;
-    opts.preemphasis = 0;
-    opts.removeDcOffset = false;
-    opts.energyMode = 0; // no energy
-}
-
-
-void make_kaldi_default(KgPreprocess::KpOptions& opts)
-{
-    make_plain(opts);
-    opts.preemphasis = 0.97;
-    opts.removeDcOffset = true;
-    opts.windowType = 0; // TODO: 
-    opts.energyMode = 1; // raw energy
-}
-
-
 void equal_test(const vectord& v1, const vectord& v2, double refTol)
 {
     if (v1.size() != v2.size()) {
