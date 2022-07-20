@@ -49,6 +49,14 @@ public:
     static bool almostEqual(KREAL x1, KREAL x2, KREAL tol = eps * 100);
     static bool almostEqualRel(KREAL x1, KREAL x2, KREAL rel_tol = 0.001);
 
+    static KREAL clampFloor(KREAL x, KREAL low) {
+        return std::max(x, low);
+    }
+
+    static KREAL clampCeil(KREAL x, KREAL high) {
+        return std::min(x, high);
+    }
+
     // 确保x在[low, high]之间
     static KREAL clamp(KREAL x, KREAL low, KREAL high) { 
         return std::max(std::min(x, high), low); 

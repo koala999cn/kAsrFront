@@ -37,7 +37,7 @@ public:
 	unsigned idim() const;
 	unsigned odim() const;
 
-	// @in: 输入频谱数据[0, nf], 共isize_个频点, x0ref = 0.5
+	// @in: 输入频谱数据[0, nf], 共idim_个频点
 	void process(const double* in, double* out);
 
 	// 返回第bin个子带的中心频率(Hz)

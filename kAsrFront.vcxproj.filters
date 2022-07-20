@@ -50,6 +50,15 @@
     <ClCompile Include="src\capture\KgWindowing.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\feature\KgMfcc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\KgDct.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\feature\KuCepsUtil.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\capture\KcAudioDevice.h">
@@ -107,6 +116,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\base\KtSampling.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgMfcc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\KgDct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KuCepsUtil.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

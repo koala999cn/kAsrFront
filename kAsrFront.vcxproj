@@ -179,6 +179,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\base\KgDct.cpp" />
     <ClCompile Include="src\base\KgRdft.cpp" />
     <ClCompile Include="src\base\KuFreqUnit.cpp" />
     <ClCompile Include="src\base\KuStrUtil.cpp" />
@@ -188,12 +189,15 @@
     <ClCompile Include="src\capture\KgVoixenVad.cpp" />
     <ClCompile Include="src\capture\KgWindowing.cpp" />
     <ClCompile Include="src\feature\KgFbank.cpp" />
+    <ClCompile Include="src\feature\KgMfcc.cpp" />
     <ClCompile Include="src\feature\KgPreprocess.cpp" />
     <ClCompile Include="src\feature\KgSpectrogram.cpp" />
     <ClCompile Include="src\feature\KgSpectrum.cpp" />
+    <ClCompile Include="src\feature\KuCepsUtil.cpp" />
     <ClCompile Include="src\KgAsrFrontFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\base\KgDct.h" />
     <ClInclude Include="src\base\KgRdft.h" />
     <ClInclude Include="src\base\KtFraming.h" />
     <ClInclude Include="src\base\KtInterval.h" />
@@ -209,9 +213,11 @@
     <ClInclude Include="src\capture\KgWindowing.h" />
     <ClInclude Include="src\capture\KuAudioUtil.h" />
     <ClInclude Include="src\feature\KgFbank.h" />
+    <ClInclude Include="src\feature\KgMfcc.h" />
     <ClInclude Include="src\feature\KgPreprocess.h" />
     <ClInclude Include="src\feature\KgSpectrogram.h" />
     <ClInclude Include="src\feature\KgSpectrum.h" />
+    <ClInclude Include="src\feature\KuCepsUtil.h" />
     <ClInclude Include="src\KgAsrFrontFrame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
