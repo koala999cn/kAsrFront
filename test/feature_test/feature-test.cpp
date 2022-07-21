@@ -1,8 +1,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "feature/KgPreprocess.h"
-#include "feature/KgFbank.h"
 
 
 void test_failed();
