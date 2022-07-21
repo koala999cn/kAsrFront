@@ -316,11 +316,16 @@ template<class KREAL>
 bool KtuMath<KREAL>::almostEqualRel(KREAL x1, KREAL x2, KREAL rel_tol)
 {
     // a==b handles infinities.
-    if(x1 == x2) return true;
-    if (x1 == 0 || x2 == 0) return almostEqual(x1, x2, rel_tol); // TODO: 
-    double diff = std::abs(x1 - x2);
-    if(isUndefined(diff))
+    if (x1 == x2) return true;
+
+    KREAL diff = std::abs(x1 - x2);
+
+    if (isUndefined(diff))
         return false;
+
+    if (almostEqual(diff, 0, rel_tol)) // 处理非常小的数值
+        return true;
+    
     return diff <= rel_tol*(std::abs(x1) + std::abs(x2));
 }
 
