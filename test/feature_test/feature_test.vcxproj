@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="delta-sdc-test.cpp" />
     <ClCompile Include="delta-test.cpp" />
     <ClCompile Include="fbank-test.cpp" />
     <ClCompile Include="fbank_naive_test.cpp" />

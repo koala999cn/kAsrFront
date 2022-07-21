@@ -14,6 +14,7 @@ void fbank_test(const std::vector<double>& wav);
 void mfcc_naive_test();
 void mfcc_test(const std::vector<double>& wav);
 void delta_test();
+void delta_sdc_test();
 
 static std::vector<double> read_test_wav()
 {
@@ -56,6 +57,7 @@ int main()
     mfcc_naive_test();
     mfcc_test(wav);
     delta_test();
+    delta_sdc_test();
 
     printf("  :) All Passed.\n");
 

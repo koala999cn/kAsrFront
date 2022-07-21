@@ -62,7 +62,7 @@
     <ClCompile Include="src\feature\KgDelta.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\feature\KgShiftedDeltaFeature.cpp">
+    <ClCompile Include="src\feature\KgShiftedDelta.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -136,7 +136,7 @@
     <ClInclude Include="src\feature\KgDelta.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\feature\KgShiftedDeltaFeature.h">
+    <ClInclude Include="src\feature\KgShiftedDelta.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
