@@ -160,8 +160,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="fbank-test.cpp" />
+    <ClCompile Include="fbank_naive_test.cpp" />
     <ClCompile Include="feature-test.cpp" />
     <ClCompile Include="fft-test.cpp" />
+    <ClCompile Include="mfcc-naive-test.cpp" />
     <ClCompile Include="mfcc-test.cpp" />
     <ClCompile Include="spectrogram-test.cpp" />
     <ClCompile Include="spectrum-test.cpp" />

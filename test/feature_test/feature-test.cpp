@@ -9,7 +9,9 @@ void test_failed();
 void fft_test(const std::vector<double>& wav);
 void spectrum_test(const std::vector<double>& wav);
 void spectrogram_test(const std::vector<double>& wav);
+void fbank_naive_test();
 void fbank_test(const std::vector<double>& wav);
+void mfcc_naive_test();
 void mfcc_test(const std::vector<double>& wav);
 
 static std::vector<double> read_test_wav()
@@ -45,11 +47,13 @@ int main()
     if (wav.empty())
         return 1;
 
-    mfcc_test(wav);
-    fbank_test(wav);
     fft_test(wav);
     spectrum_test(wav);
     spectrogram_test(wav);
+    fbank_naive_test();
+    fbank_test(wav);
+    mfcc_naive_test();
+    mfcc_test(wav);
 
     printf("  :) All Passed.\n");
 
