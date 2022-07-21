@@ -59,6 +59,12 @@
     <ClCompile Include="src\feature\KuCepsUtil.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\feature\KgDelta.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\feature\KgShiftedDeltaFeature.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\capture\KcAudioDevice.h">
@@ -125,6 +131,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\KuCepsUtil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgDelta.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgShiftedDeltaFeature.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

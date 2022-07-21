@@ -188,9 +188,11 @@
     <ClCompile Include="src\capture\KgPreemphasis.cpp" />
     <ClCompile Include="src\capture\KgVoixenVad.cpp" />
     <ClCompile Include="src\capture\KgWindowing.cpp" />
+    <ClCompile Include="src\feature\KgDelta.cpp" />
     <ClCompile Include="src\feature\KgFbank.cpp" />
     <ClCompile Include="src\feature\KgMfcc.cpp" />
     <ClCompile Include="src\feature\KgPreprocess.cpp" />
+    <ClCompile Include="src\feature\KgShiftedDeltaFeature.cpp" />
     <ClCompile Include="src\feature\KgSpectrogram.cpp" />
     <ClCompile Include="src\feature\KgSpectrum.cpp" />
     <ClCompile Include="src\feature\KuCepsUtil.cpp" />
@@ -212,9 +214,11 @@
     <ClInclude Include="src\capture\KgVoixenVad.h" />
     <ClInclude Include="src\capture\KgWindowing.h" />
     <ClInclude Include="src\capture\KuAudioUtil.h" />
+    <ClInclude Include="src\feature\KgDelta.h" />
     <ClInclude Include="src\feature\KgFbank.h" />
     <ClInclude Include="src\feature\KgMfcc.h" />
     <ClInclude Include="src\feature\KgPreprocess.h" />
+    <ClInclude Include="src\feature\KgShiftedDeltaFeature.h" />
     <ClInclude Include="src\feature\KgSpectrogram.h" />
     <ClInclude Include="src\feature\KgSpectrum.h" />
     <ClInclude Include="src\feature\KuCepsUtil.h" />
