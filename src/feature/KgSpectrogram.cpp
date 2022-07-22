@@ -9,13 +9,20 @@ KgSpectrogram::KgSpectrogram(const KpOptions& opts)
 	auto fftFramingSize = opts.roundToPower2 ? 
 		KtuBitwise<unsigned>::ceilPower2(opts.frameSize) : opts.frameSize;
 
+	// KgPreprocess使用原尺寸
+	prep_ = std::make_unique<KgPreprocess>(opts); 
+	prep_->setHandler([this](double* frame, double energy) {
+		std::vector<double> spec(((KgSpectrum*)dptr_)->odim());
+		processOneFrame_(frame, spec.data());
+		if (prep_->options().energyMode != KgPreprocess::k_energy_none)
+			spec[0] = fixEnergy_(energy);
+		handler_(spec.data());
+		});
+
 	// KgSpectrum使用rounded尺寸
 	auto spec = new KgSpectrum(fftFramingSize, opts.sampleRate, KgSpectrum::KeNormMode(opts.norm));
 	spec->setType(KgSpectrum::KeType(opts.type));
 	dptr_ = spec;
-
-	// KgPreprocess使用原尺寸
-	prep_ = std::make_unique<KgPreprocess>(opts); 
 }
 
 
@@ -25,29 +32,20 @@ KgSpectrogram::~KgSpectrogram()
 }
 
 
-void KgSpectrogram::process(const double* buf, unsigned len, spcetrum_handler sh) const
+void KgSpectrogram::setHandler(std::function<void(double* spec)> h)
 {
-	prep_->process(buf, len, [this, sh](double* frame, double energy) {
-		std::vector<double> spec(((KgSpectrum*)dptr_)->odim());
-		processOneFrame_(frame, spec.data());
-		if(prep_->options().energyMode != KgPreprocess::k_energy_none)
-			spec[0] = fixEnergy_(energy);
-		sh(spec.data());
-		return true;
-		});
+	handler_ = h;
+}
+
+void KgSpectrogram::process(const double* buf, unsigned len) const
+{
+	prep_->process(buf, len);
 }
 
 
-void KgSpectrogram::flush(spcetrum_handler sh) const
+void KgSpectrogram::flush() const
 {
-	prep_->flush([this, sh](double* frame, double energy) {
-		std::vector<double> spec(((KgSpectrum*)dptr_)->odim());
-		processOneFrame_(frame, spec.data());
-		if (prep_->options().energyMode != KgPreprocess::k_energy_none)
-			spec[0] = fixEnergy_(energy);
-		sh(spec.data());
-		return true;
-		});
+	prep_->flush();
 }
 
 

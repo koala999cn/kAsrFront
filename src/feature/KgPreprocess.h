@@ -41,11 +41,13 @@ public:
 
 	~KgPreprocess();
 
-	using frame_handler = std::function<bool(double* frame, double energy)>;
+	// 设置回调函数，process和flush将逐帧调用该函数
+	// h的第一个参数为帧数据指针，第二个参数为帧能量（power energy）
+	void setHandler(std::function<void(double*, double)> h);
 
-	void process(const double* buf, unsigned len, frame_handler fh) const;
+	void process(const double* buf, unsigned len) const;
 
-	void flush(frame_handler fh) const;
+	void flush() const;
 
 	// 只有输出维度，输入维度由用户提供
 	unsigned odim() const {
@@ -61,5 +63,6 @@ private:
 private:
 	KpOptions opts_;
 	void* dptr_;
+	std::function<void(double*, double)> handler_;
 };
 

@@ -28,14 +28,14 @@ void mfcc_test(const std::vector<double>& wav)
 
 	matrixd mat;
 	unsigned spec_size = spec.odim();
-	auto spec_handler = [&mat, &spec_size](double* spec) -> bool {
+	auto spec_handler = [&mat, &spec_size](double* spec) {
 		vectord v;
 		v.assign(spec, spec + spec_size);
 		mat.push_back(v);
 		return true;
 	};
-
-	spec.process(wav.data(), wav.size(), spec_handler);
+	spec.setHandler(spec_handler);
+	spec.process(wav.data(), wav.size());
 
 	KgFbank::KpOptions fbankOpts;
 	fbankOpts.type = KgFbank::k_mel; // kaldi使用mel尺度计算fbank
@@ -74,7 +74,8 @@ void mfcc_test(const std::vector<double>& wav)
 	{
 		KgSpectrogram spec(opts);
 		spec_size = spec.odim();
-		spec.process(wav.data(), wav.size(), spec_handler);
+		spec.setHandler(spec_handler);
+		spec.process(wav.data(), wav.size());
 		KgFbank fbank(16000, spec.odim(), fbankOpts);
 
 		mfccOpts.cepsLifter = 22;

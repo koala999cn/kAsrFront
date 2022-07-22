@@ -40,24 +40,29 @@ KgPreprocess::~KgPreprocess()
 }
 
 
-void KgPreprocess::process(const double* buf, unsigned len, frame_handler fh) const
+void KgPreprocess::setHandler(std::function<void(double*, double)> h)
+{
+    handler_ = h;
+}
+
+void KgPreprocess::process(const double* buf, unsigned len) const
 {
     auto d = (kPrivate::KgPreprocessInternal_*)dptr_;
-    d->framing->apply(buf, buf + len, [this, fh](const double* frame) {
+    d->framing->apply(buf, buf + len, [this](const double* frame) {
         std::vector<double> out(odim());
         auto e = processOneFrame_(frame, out.data());
-        fh(out.data(), e);
+        handler_(out.data(), e);
         });
 }
 
 
-void KgPreprocess::flush(frame_handler fh) const
+void KgPreprocess::flush() const
 {
     auto d = (kPrivate::KgPreprocessInternal_*)dptr_;
-    d->framing->flush([this, fh](const double* frame) {
+    d->framing->flush([this](const double* frame) {
         std::vector<double> out(odim());
         auto e = processOneFrame_(frame, out.data());
-        fh(out.data(), e);
+        handler_(out.data(), e);
         });
 }
 
@@ -66,8 +71,9 @@ double KgPreprocess::processOneFrame_(const double* in, double* out) const
 {
     std::copy(in, in + odim(), out);
 
-    if (opts_.dither != 0)
+    if (opts_.dither != 0) {
         ; // TODO: DO dithering
+    }
 
     if (opts_.removeDcOffset)
         KtuMath<double>::subMean(out, odim());

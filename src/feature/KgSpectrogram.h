@@ -20,11 +20,11 @@ public:
 
 	~KgSpectrogram();
 
-	using spcetrum_handler = std::function<bool(double* spec)>;
+	void setHandler(std::function<void(double* spec)> h);
 
-	void process(const double* buf, unsigned len, spcetrum_handler sh) const;
+	void process(const double* buf, unsigned len) const;
 
-	void flush(spcetrum_handler sh) const;
+	void flush() const;
 
 	// 只有输出维度，输入维度由用户提供
 	unsigned odim() const;
@@ -40,4 +40,5 @@ private:
 	double energyFloor_;
 	std::unique_ptr<KgPreprocess> prep_;
 	void* dptr_;
+	std::function<void(double* spec)> handler_;
 };
