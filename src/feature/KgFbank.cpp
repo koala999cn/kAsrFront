@@ -6,38 +6,38 @@
 #include "KtuMath.h"
 
 
-KgFbank::KgFbank(double sampleRate, unsigned idim, const KpOptions& opts)
+KgFbank::KgFbank(const KpOptions& opts)
     : opts_(opts)
-    , idim_(idim)
 {
     if (opts_.highFreq <= 0)
-        opts_.highFreq = sampleRate / 2; // 取奈奎斯特频率
+        opts_.highFreq = opts.sampleRate / 2; // 取奈奎斯特频率
 
     // 边界检测
     assert(opts_.lowFreq >= 0 && opts_.highFreq > opts_.lowFreq);
     assert(opts_.type >= k_linear && opts_.type <= k_erb);
 
-    initWeights_(sampleRate);
+    initWeights_();
 }
 
 
 unsigned KgFbank::idim() const
 {
-    return idim_;
+    return opts_.fftBins;
 }
 
 
 unsigned KgFbank::odim() const
 {
-    return opts_.numBins;
+    return opts_.numBanks;
 }
 
 
 void KgFbank::process(const double* in, double* out)
 {
-    for (unsigned i = 0; i < opts_.numBins; i++) 
+    for (unsigned i = 0; i < opts_.numBanks; i++) 
         // 若weights_[i].size() == 0, dot返回0.0
-        out[i] = KtuMath<double>::dot(in + firstIdx_[i], weights_[i].data(), weights_[i].size());
+        out[i] = KtuMath<double>::dot(in + firstIdx_[i], weights_[i].data(), 
+            static_cast<unsigned>(weights_[i].size()));
 }
 
 
@@ -69,23 +69,22 @@ double KgFbank::fromHertz_(double hz)
 }
 
 
-void KgFbank::initWeights_(double sampleRate)
+void KgFbank::initWeights_()
 {
     // Hz尺度的采样参数
     KtSampling<double> sanpHertz;
-    //sanpHertz.resetn(idim_, 0, sampleRate / 2, 0.5);
-    sanpHertz.resetn(idim_, 0, sampleRate / 2, 0); // 兼容kaldi, x0ref取0
+    sanpHertz.resetn(idim(), 0, opts_.sampleRate / 2, 0); // 兼容kaldi, x0ref取0
 
     // 目标(type_)尺度的采样参数
     auto lowScale = fromHertz_(opts_.lowFreq);
     auto highScale = fromHertz_(opts_.highFreq);
     KtSampling<double> sanpScale;
-    sanpScale.resetn(opts_.numBins + 1, lowScale, highScale, 0); // 在目标尺度上均匀划分各bin，相邻的bin有1/2重叠
+    sanpScale.resetn(opts_.numBanks + 1, lowScale, highScale, 0); // 在目标尺度上均匀划分各bin，相邻的bin有1/2重叠
 
-    firstIdx_.resize(opts_.numBins);
-    fc_.resize(opts_.numBins);
-    weights_.resize(opts_.numBins);
-    for (unsigned bin = 0; bin < opts_.numBins; bin++) {
+    firstIdx_.resize(opts_.numBanks);
+    fc_.resize(opts_.numBanks);
+    weights_.resize(opts_.numBanks);
+    for (unsigned bin = 0; bin < opts_.numBanks; bin++) {
 
         // 计算目标尺度上的this_bin的参数（左边频率，右边频率，中心频率）
         auto fl = sanpScale.indexToX(bin);
@@ -98,7 +97,7 @@ void KgFbank::initWeights_(double sampleRate)
         auto lowIdx = sanpHertz.xToHighIndex(flhz);
         auto highIdx = sanpHertz.xToLowIndex(frhz);
         lowIdx = std::max(lowIdx, long(0));
-        highIdx = std::min(highIdx, long(idim_ - 1));
+        highIdx = std::min(highIdx, long(idim() - 1));
         firstIdx_[bin] = lowIdx;
         fc_[bin] = toHertz_(fc);
 
@@ -112,7 +111,8 @@ void KgFbank::initWeights_(double sampleRate)
                 wt[i - lowIdx] = calcFilterWeight_(fl, fr, fromHertz_(sanpHertz.indexToX(i)));
 
             if (opts_.normalize)
-                KtuMath<double>::scale(wt.data(), wt.size(), 1. / (frhz - flhz));
+                KtuMath<double>::scale(wt.data(), 
+                    static_cast<unsigned>(wt.size()), 1. / (frhz - flhz));
         }
     }
 }
