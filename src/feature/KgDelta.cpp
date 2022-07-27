@@ -11,14 +11,14 @@ KgDelta::KgDelta(unsigned order, unsigned window)
 	scales_[0].resize(1);
 	scales_[0][0] = 1.0;  // trivial window for 0th order delta [i.e. baseline feats]
 
-	for (int i = 1; i <= order; i++) {
+	for (unsigned i = 1; i <= order; i++) {
 		std::vector<double> &prev_scales = scales_[i - 1],
 			&cur_scales = scales_[i];
 
 		int prev_offset = (static_cast<int>(prev_scales.size() - 1)) / 2,
 			cur_offset = prev_offset + window;
 		cur_scales.resize(prev_scales.size() + 2 * window); 
-		KtuMath<double>::zeros(cur_scales.data(), cur_scales.size()); // also zeros it.
+		KtuMath<double>::zeros(cur_scales.data(), static_cast<unsigned>(cur_scales.size())); 
 
 		double normalizer = 0.0;
 		int j = -static_cast<int>(window);
@@ -29,7 +29,8 @@ KgDelta::KgDelta(unsigned order, unsigned window)
 					static_cast<double>(j) * prev_scales[k + prev_offset];
 			}
 		}
-		KtuMath<double>::scale(cur_scales.data(), cur_scales.size(), 1.0 / normalizer);
+		KtuMath<double>::scale(cur_scales.data(), 
+			static_cast<unsigned>(cur_scales.size()), 1.0 / normalizer);
 	}
 }
 
@@ -38,14 +39,14 @@ std::vector<double> KgDelta::process(const matrixd &input_feats, unsigned frame)
 {
 	assert(frame < input_feats.size());
 
-	unsigned num_frames = input_feats.size(),
-		feat_dim = input_feats[0].size();
+	unsigned num_frames = static_cast<unsigned>(input_feats.size()),
+		feat_dim = static_cast<unsigned>(input_feats[0].size());
 	std::vector<double> output_frame;
 	output_frame.resize(feat_dim * scales_.size());
-	KtuMath<double>::zeros(output_frame.data(), output_frame.size());
+	KtuMath<double>::zeros(output_frame.data(), static_cast<unsigned>(output_frame.size()));
 	for (unsigned i = 0; i < scales_.size(); i++) {
 		const std::vector<double> &scales = scales_[i];
-		int max_offset = (scales.size() - 1) / 2;
+		int max_offset = (static_cast<int>(scales.size()) - 1) / 2;
 		double* output = output_frame.data() + i*feat_dim;
 		for (int j = -max_offset; j <= max_offset; j++) {
 			int offset_frame = KtuMath<int>::clamp(frame + j, 0, num_frames - 1);

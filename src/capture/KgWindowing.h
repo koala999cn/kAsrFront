@@ -25,8 +25,8 @@ public:
 
 	KgWindowing(unsigned frameSize, KeType type, ...);
 
-	unsigned idim() const { return win_.size(); }
-	unsigned odim() const { return win_.size(); }
+	unsigned idim() const { return static_cast<unsigned>(win_.size()); }
+	unsigned odim() const { return static_cast<unsigned>(win_.size()); }
 
 	void porcess(double* data/*inout*/) const;
 

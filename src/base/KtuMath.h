@@ -182,6 +182,8 @@ public:
     static void scale(KREAL x[], unsigned n, KREAL alpha); // x[i] *= alpha
     static void shift(KREAL x[], unsigned n, KREAL scalar); // x[i] += scalar
     static void subMean(KREAL x[], unsigned n); // x[i] -= mean
+    static void recip(KREAL x[], unsigned n); // 倒数: x[i] = 1 / x[i]
+    static void recip(const KREAL x[], KREAL r[], unsigned n); // 倒数: r[i] = 1 / x[i]
 
     static void add(const KREAL x[], const KREAL y[], KREAL r[], unsigned n); // r[i] = x[i] + y[i]
     static void sub(const KREAL x[], const KREAL y[], KREAL r[], unsigned n); // r[i] = x[i] - y[i]
@@ -658,6 +660,19 @@ template<class KREAL>
 void KtuMath<KREAL>::subMean(KREAL x[], unsigned n)
 {
     shift(x, n, -mean(x, n));
+}
+
+template<class KREAL>
+void KtuMath<KREAL>::recip(KREAL x[], unsigned n)
+{
+    forEach(x, n, [](KREAL x) { return 1 / x; });
+}
+
+
+template<class KREAL>
+void KtuMath<KREAL>::recip(const KREAL x[], KREAL r[], unsigned n)
+{
+    forEach(x, r, n, [](KREAL x) { return 1 / x; });
 }
 
 template<class KREAL>

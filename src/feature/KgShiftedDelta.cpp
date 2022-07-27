@@ -13,17 +13,18 @@ KgShiftedDelta::KgShiftedDelta(int window, int num_blocks, int block_shift) :
 		normalizer += j*j;
 		scales_[j + window] += static_cast<double>(j);
 	}
-	KtuMath<double>::scale(scales_.data(), scales_.size(), 1.0 / normalizer);
+	KtuMath<double>::scale(scales_.data(), 
+		static_cast<unsigned>(scales_.size()), 1.0 / normalizer);
 }
 
 
 std::vector<double> KgShiftedDelta::process(const matrixd &input_feats, unsigned frame) const
 {
-	unsigned num_frames = input_feats.size(),
-		feat_dim = input_feats[0].size();
+	unsigned num_frames = static_cast<unsigned>(input_feats.size()),
+		feat_dim = static_cast<unsigned>(input_feats[0].size());
 	std::vector<double> output_frame;
 	output_frame.resize(feat_dim * (num_blocks_ + 1));
-	KtuMath<double>::zeros(output_frame.data(), output_frame.size());
+	KtuMath<double>::zeros(output_frame.data(), static_cast<unsigned>(output_frame.size()));
 
 	// The original features
 	KtuMath<double>::add(output_frame.data(), input_feats[frame].data(), output_frame.data(), feat_dim);
@@ -31,7 +32,7 @@ std::vector<double> KgShiftedDelta::process(const matrixd &input_feats, unsigned
 	// Concatenate the delta-blocks. Each block is block_shift
 	// (usually 3) frames apart.
 	for (int i = 0; i < num_blocks_; i++) {
-		int max_offset = (scales_.size() - 1) / 2;
+		int max_offset = (static_cast<int>(scales_.size()) - 1) / 2;
 		double* output = output_frame.data() + (i + 1) * feat_dim;
 		for (int j = -max_offset; j <= max_offset; j++) {
 			int offset_frame = KtuMath<int>::clamp(frame + j + i * block_shift_, 0, num_frames - 1);
