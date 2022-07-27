@@ -26,28 +26,38 @@ public:
 		k_norm_kaldi // 用int16最大值作归一化(兼容kaldi)，非规范操作，慎用
 	};
 
+	struct KpOptions
+	{
+		unsigned frameSize;
+		double sampleRate;
+
+		KeType type; 
+		KeNormMode norm; 
+		bool roundToPower2;
+
+		//double energyFloor; // 当信号energy小于该值时，用该值替代信号energy值，与norm高度相关
+	};
+
 	// @frameSize: 输入数据的长度
-	KgSpectrum(unsigned frameSize, double sampleRate, KeNormMode norm);
+	KgSpectrum() = default;
+	KgSpectrum(KgSpectrum&& spec);
+	KgSpectrum(const KpOptions& opts);
 	~KgSpectrum();
 
 	// 返回输入输出的规格
 	unsigned idim() const;
 	unsigned odim() const;
 
-	void reset(unsigned frameSize);
+	void process(const double* in, double* out) const;
 
-	void porcess(double* data/*inout*/) const;
+	const KpOptions& options() const { return opts_; }
 
-	int type() const { return type_; }
-	void setType(KeType type) { type_ = type; }
+private:
 
-	int normMode() const { return norm_; }
-
-	double sampleRate() const { return f_; }
+	// 对功率谱数据data进行归一化和类型转换
+	void fixPower_(double* spec, unsigned c, bool hasNormDefault = true) const;
 
 private:
 	void* rdft_;
-	KeType type_;
-	const KeNormMode norm_;
-	const double f_; // 采样频率
+	KpOptions opts_;
 };
