@@ -219,7 +219,7 @@
     <ClInclude Include="src\feature\KgMfcc.h" />
     <ClInclude Include="src\feature\KgPreprocess.h" />
     <ClInclude Include="src\feature\KgShiftedDelta.h" />
-    <ClInclude Include="src\feature\KgSpectrogram.h" />
+    <ClInclude Include="src\feature\KtFeatPipeline.h" />
     <ClInclude Include="src\feature\KgSpectrum.h" />
     <ClInclude Include="src\feature\KuCepsUtil.h" />
     <ClInclude Include="src\KgAsrFrontFrame.h" />

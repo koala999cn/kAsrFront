@@ -112,7 +112,7 @@
     <ClInclude Include="src\base\KgRdft.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\feature\KgSpectrogram.h">
+    <ClInclude Include="src\feature\KtFeatPipeline.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\capture\KgPreemphasis.h">
