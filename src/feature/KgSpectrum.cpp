@@ -15,7 +15,7 @@ KgSpectrum::KgSpectrum(const KpOptions& opts)
 }
 
 
-KgSpectrum::KgSpectrum(KgSpectrum&& spec)
+KgSpectrum::KgSpectrum(KgSpectrum&& spec) noexcept
 	: opts_(spec.opts_)
 {
 	std::swap(rdft_, spec.rdft_);
@@ -83,4 +83,12 @@ void KgSpectrum::fixPower(double* spec, unsigned c, bool hasNormDefault) const
 		kMath::applyFloor(spec, c, std::numeric_limits<double>::epsilon());
 		kMath::forEach(spec, c, [](double x) { return 10 * std::log10(x); });
 	}
+}
+
+
+unsigned KgSpectrum::odim(unsigned frameSize, bool roundToPower2)
+{
+	if (roundToPower2)
+		frameSize = KtuBitwise<unsigned>::ceilPower2(frameSize);
+	return frameSize / 2 + 1;
 }

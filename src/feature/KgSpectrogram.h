@@ -10,7 +10,7 @@ public:
 
 	struct KpOptions : public KgPreprocess::KpOptions
 	{
-		// 若KgPreprocess::useEnergy非k_use_energy_none, 则c0用energy替换
+		// 若KgPreprocess::useEnergy非k_use_energy_none, 则用信号能量替换s0
 
 		KgSpectrum::KeType type;
 		KgSpectrum::KeNormMode norm;

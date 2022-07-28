@@ -38,7 +38,7 @@ public:
 
 	// @frameSize: 输入数据的长度
 	KgSpectrum() = default;
-	KgSpectrum(KgSpectrum&& spec);
+	KgSpectrum(KgSpectrum&& spec) noexcept;
 	KgSpectrum(const KpOptions& opts);
 	~KgSpectrum();
 
@@ -52,6 +52,9 @@ public:
 
 	// 对功率谱数据data进行归一化和类型转换
 	void fixPower(double* spec, unsigned c, bool hasNormDefault = true) const;
+
+	// 计算谱输出维度的帮助函数
+	static unsigned odim(unsigned frameSize, bool roundToPower2);
 
 private:
 	void* rdft_;
