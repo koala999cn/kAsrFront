@@ -15,18 +15,20 @@ void fbank_naive_test()
 			c = exp(c); // ´ÓlogÆ××ª»»ÎªpowerÆ×
 
 	KgFbank::KpOptions fbankOpts;
+	fbankOpts.sampleRate = 16000;
+	fbankOpts.fftBins = unsigned(spec[0].size());
 	fbankOpts.type = KgFbank::k_mel; 
 	fbankOpts.lowFreq = 20;
 	fbankOpts.highFreq = 0;
-	fbankOpts.numBins = 23;
+	fbankOpts.numBanks = 23;
 	fbankOpts.normalize = false;
-	KgFbank fbank(16000, spec[0].size(), fbankOpts);
+	KgFbank fbank(fbankOpts);
 	matrixd mat;
 	for (auto& i : spec) {
 		std::vector<double> out(fbank.odim());
 		fbank.process(i.data(), out.data());
-		KtuMath<double>::applyFloor(out.data(), out.size(), std::numeric_limits<double>::epsilon());
-		KtuMath<double>::applyLog(out.data(), out.size());
+		KtuMath<double>::applyFloor(out.data(), unsigned(out.size()), std::numeric_limits<double>::epsilon());
+		KtuMath<double>::applyLog(out.data(), unsigned(out.size()));
 		mat.push_back(out);
 	}
 	printf("  test with kaldi plain...  ");

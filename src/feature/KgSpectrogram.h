@@ -1,44 +1,47 @@
 #pragma once
-#include "KgPreprocess.h"
-#include <memory>
+#include "KtFeatPipeline.h"
+#include "KgSpectrum.h"
 
 
-class KgSpectrogram
+class KgSpectrogram : public KtFeatPipeline<KgSpectrum>
 {
 public:
+	using super_ = KtFeatPipeline<KgSpectrum>;
+
 
 	struct KpOptions : public KgPreprocess::KpOptions
 	{
-		int type; // 频谱类型, 参见KgSpectrum::KeType
-		int norm; // 归一化模式，参见KgSpectrum::KeNormMode
+		KgSpectrum::KeType type;
+		KgSpectrum::KeNormMode norm;
 		bool roundToPower2;
-		double energyFloor; // 当信号energy小于该值时，用该值替代信号energy值，与norm高度相关
+		double energyFloor; // 当energy小于该值时，用该值替代信号energy值，与norm高度相关
 	};
 
-	
-	KgSpectrogram(const KpOptions& opts);
+	KgSpectrogram(const KpOptions& opts)
+		: super_(opts, KgSpectrum::KpOptions{ 
+		     opts.frameSize, 
+			 opts.sampleRate, 
+			 opts.type, 
+			 opts.norm, 
+			 opts.roundToPower2 
+			})
+	    , energyFloor_(opts.energyFloor) {
 
-	~KgSpectrogram();
+		// 重置特征生成过程
+		prep_->setHandler([this](double* frame, double energy) {
+			std::vector<double> out(odim());
+			pipeline_.process(frame, out.data());
+			if (prep_->options().useEnergy != KgPreprocess::k_use_energy_none) {
+				out[0] = energy;
+				pipeline_.get<0>().fixPower(out.data(), 1, false); // 修正能量值
+				if (out[0] < energyFloor_)
+					out[0] = energyFloor_;
+			}
 
-	void setHandler(std::function<void(double* spec)> h);
-
-	void process(const double* buf, unsigned len) const;
-
-	void flush() const;
-
-	// 只有输出维度，输入维度由用户提供
-	unsigned odim() const;
-
-private:
-
-	void processOneFrame_(double* in, double* out) const;
-
-	// 根据频谱类型和归一化模式，修正能量值
-	double fixEnergy_(double energy) const;
+			handler_(out.data());
+			});
+	}
 
 private:
 	double energyFloor_;
-	std::unique_ptr<KgPreprocess> prep_;
-	void* dptr_;
-	std::function<void(double* spec)> handler_;
 };

@@ -1,5 +1,4 @@
 #include "feature/KgSpectrogram.h"
-#include "feature/KgSpectrum.h"
 #include "capture/KgWindowing.h"
 #include "test-util.h"
 
@@ -24,7 +23,7 @@ void spectrogram_test(const std::vector<double>& wav)
 	opts.preemphasis = 0;
 	opts.removeDcOffset = false;
 	opts.windowType = KgWindowing::k_rectangle;
-	opts.energyMode = KgPreprocess::k_energy_raw;
+	opts.useEnergy = KgPreprocess::k_use_energy_raw;
 	opts.roundToPower2 = false;
 	opts.type = KgSpectrum::k_log; // 对于spectrogram，kaldi始终计算log谱
 	opts.norm = KgSpectrum::k_norm_kaldi;
@@ -38,8 +37,9 @@ void spectrogram_test(const std::vector<double>& wav)
 	auto kaldi = load_matrix("../data/spectrogram-kaldi-plain.txt");
 	dump_bias(mat, kaldi);
 
+
 	mat.clear();
-	opts.energyMode = KgPreprocess::k_energy_post;
+	opts.useEnergy = KgPreprocess::k_use_energy_win;
 	opts.preemphasis = 0.97;
 	opts.removeDcOffset = true;
 	opts.roundToPower2 = true;
@@ -49,11 +49,10 @@ void spectrogram_test(const std::vector<double>& wav)
 		spec_size = spec.odim();
 		spec.setHandler(spec_handler);
 		spec.process(wav.data(), wav.size());
-		//spec.flush(spec_handler);
 	}
 	printf("  test with kaldi preprocessed...  ");
 	kaldi = load_matrix("../data/spectrogram-kaldi-prep.txt");
 	dump_bias(mat, kaldi);
 
-	printf(":)passed.\n");
+	//printf(":)passed.\n");
 }

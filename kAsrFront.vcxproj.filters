@@ -139,5 +139,11 @@
     <ClInclude Include="src\feature\KgShiftedDelta.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\feature\KtPipeline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgSpectrogram.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

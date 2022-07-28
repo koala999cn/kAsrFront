@@ -9,9 +9,9 @@ public:
 
 	enum KeEnergyMode
 	{
-		k_energy_none,
-		k_energy_raw,
-		k_energy_post
+		k_use_energy_none,
+		k_use_energy_raw,
+		k_use_energy_win // 加窗后的能量
 	};
 
 	struct KpOptions
@@ -30,8 +30,10 @@ public:
 		int windowType;
 		double windowArg;
 
-		int energyMode; // 0表示不计算信号的能量，1表示在preemphasis和windowing前计算信号能量，2表示预处理后计算信号能量. 
-		                // E = sum(x[i]*x[i])
+		KeEnergyMode useEnergy; // k_use_energy_none表示不计算信号的能量，
+		                        // k_use_energy_raw表示在preemphasis和windowing前计算信号能量，
+								// k_use_energy_win表示加窗后计算信号能量. 
+		                        // E = sum(x[i]*x[i])
 
 		// TODO: kaldi的snip-edges暂不支持，始终默认为true
 	};

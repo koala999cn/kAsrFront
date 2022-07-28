@@ -1,3 +1,5 @@
+#if 0
+
 #include "KgSpectrogram.h"
 #include "KgSpectrum.h"
 #include "base/KtuBitwise.h"
@@ -113,3 +115,4 @@ double KgSpectrogram::fixEnergy_(double energy) const
 	return energy;
 }
 
+#endif

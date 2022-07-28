@@ -53,12 +53,12 @@ void KgSpectrum::process(const double* in, double* out) const
 
 	rdft->forward(buf.data());
 	rdft->powerSpectrum(buf.data()); // 功率谱
-	fixPower_(buf.data(), odim(), true);
+	fixPower(buf.data(), odim(), true);
 	std::copy(buf.data(), buf.data() + odim(), out);
 }
 
 
-void KgSpectrum::fixPower_(double* spec, unsigned c, bool hasNormDefault) const
+void KgSpectrum::fixPower(double* spec, unsigned c, bool hasNormDefault) const
 {
 	using kMath = KtuMath<double>;
 	constexpr double int16_max = std::numeric_limits<std::int16_t>::max();

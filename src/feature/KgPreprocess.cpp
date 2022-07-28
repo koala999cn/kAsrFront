@@ -79,7 +79,7 @@ double KgPreprocess::processOneFrame_(const double* in, double* out) const
         KtuMath<double>::subMean(out, odim());
 
     double energy(0);
-    if (opts_.energyMode == k_energy_raw)
+    if (opts_.useEnergy == k_use_energy_raw)
         energy = KtuMath<double>::sum2(out, odim());
 
     auto d = (kPrivate::KgPreprocessInternal_*)dptr_;
@@ -90,7 +90,7 @@ double KgPreprocess::processOneFrame_(const double* in, double* out) const
     if (d->windowing)
         d->windowing->porcess(out);
 
-    if (opts_.energyMode == k_energy_post)
+    if (opts_.useEnergy == k_use_energy_win)
         energy = KtuMath<double>::sum2(out, odim());
 
     return energy;

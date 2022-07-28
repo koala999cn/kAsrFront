@@ -34,8 +34,6 @@ public:
 		KeType type; 
 		KeNormMode norm; 
 		bool roundToPower2;
-
-		//double energyFloor; // 当信号energy小于该值时，用该值替代信号energy值，与norm高度相关
 	};
 
 	// @frameSize: 输入数据的长度
@@ -52,10 +50,8 @@ public:
 
 	const KpOptions& options() const { return opts_; }
 
-private:
-
 	// 对功率谱数据data进行归一化和类型转换
-	void fixPower_(double* spec, unsigned c, bool hasNormDefault = true) const;
+	void fixPower(double* spec, unsigned c, bool hasNormDefault = true) const;
 
 private:
 	void* rdft_;

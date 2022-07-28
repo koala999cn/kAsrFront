@@ -1,8 +1,8 @@
 #pragma once
 #include "KgPreprocess.h"
+#include "KtPipeline.h"
 #include <memory>
-#include <tuple>
-#include <assert.h>
+#include <functional>
 
 
 template<typename... OP>
@@ -11,18 +11,21 @@ class KtFeatPipeline
 public:
 
 	KtFeatPipeline(const KgPreprocess::KpOptions& opts, OP&&... ops) 
-	    : ops_(std::make_tuple(std::forward<OP>(ops)...)) {
+	    : pipeline_(std::forward<OP>(ops)...) {
 		prep_ = std::make_unique<KgPreprocess>(opts);
+		assert(pipeline_.idim() == prep_->odim());
+
+		// 设置缺省的特征生成handler
 		prep_->setHandler([this](double* frame, double energy) {
 			std::vector<double> out(odim());
-			doPipeline_(frame, out.data());
-			if (prep_->options().energyMode != KgPreprocess::k_energy_none)
-				out[0] = energy; // TODO: fix energy
+			pipeline_.process(frame, out.data());
+			if (prep_->options().useEnergy != KgPreprocess::k_use_energy_none)
+				out[0] = energy; 
 			handler_(out.data());
 			});
 	}
 
-	void setHandler(std::function<void(double* spec)> h) {
+	void setHandler(std::function<void(double* out)> h) {
 		handler_ = h;
 	}
 
@@ -36,34 +39,13 @@ public:
 
 	// 只有输出维度，输入维度由用户提供
 	unsigned odim() const {
-		return std::get<std::tuple_size_v<std::tuple<OP...>> - 1>(ops_).odim();
+		return pipeline_.odim();
 	}
 
-
-private:
-
-	template<int N>
-	void doPipeline_(const double* buf, double* out) const {
-		auto& op = std::get<N - 1>(ops_);
-		assert(op.idim() == std::get<N - 2>(ops_).odim());
-		std::vector<double> temp(op.idim());
-		doPipeline_<N - 1>(buf, temp.data());
-		op.process(temp.data(), out);
-	}
-
-	template<>
-	void doPipeline_<1>(const double* buf, double* out) const {
-		std::get<0>(ops_).process(buf, out);
-	}
-
-	void doPipeline_(const double* buf, double* out) const {
-		doPipeline_<std::tuple_size_v<std::tuple<OP...>>>(buf, out);
-	}
-
-private:
+protected:
 	std::unique_ptr<KgPreprocess> prep_;
-	std::tuple<OP...> ops_;
-	std::function<void(double* spec)> handler_;
+	KtPipeline<OP...> pipeline_;
+	std::function<void(double*)> handler_;
 };
 
 /*
