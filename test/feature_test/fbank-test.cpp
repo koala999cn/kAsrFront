@@ -43,7 +43,7 @@ void fbank_test(const std::vector<double>& wav)
 	auto kaldi = load_matrix("../data/fbank-plain.txt");
 	dump_bias(mat, kaldi);
 	
-	opts.useEnergy= KgPreprocess::k_use_energy_none;
+	opts.useEnergy= KgPreprocess::k_use_energy_win;
 	opts.preemphasis = 0.97;
 	opts.removeDcOffset = true;
 	opts.roundToPower2 = true;
