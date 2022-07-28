@@ -65,6 +65,9 @@
     <ClCompile Include="src\feature\KgShiftedDelta.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\feature\KgFbankPipe.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\capture\KcAudioDevice.h">
@@ -143,6 +146,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\KgSpectrogram.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgFbankPipe.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

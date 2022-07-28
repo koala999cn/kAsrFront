@@ -41,6 +41,5 @@ void spectrum_test(const std::vector<double>& wav)
 		test_failed();
 	}
 	dump_bias(out, kaldi.front());
-	printf(":)passed.\n");
 }
 

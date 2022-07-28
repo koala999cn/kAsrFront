@@ -32,7 +32,7 @@ unsigned KgFbank::odim() const
 }
 
 
-void KgFbank::process(const double* in, double* out)
+void KgFbank::process(const double* in, double* out) const
 {
     for (unsigned i = 0; i < opts_.numBanks; i++) 
         // 若weights_[i].size() == 0, dot返回0.0

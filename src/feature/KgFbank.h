@@ -39,7 +39,7 @@ public:
 	unsigned odim() const;
 
 	// @in: 输入频谱数据[0, nf], 共idim_个频点
-	void process(const double* in, double* out);
+	void process(const double* in, double* out) const;
 
 	// 返回第idx个子带的中心频率(Hz)
 	double fc(unsigned idx) const { return fc_[idx]; }
