@@ -53,8 +53,16 @@ public:
 	// 对功率谱数据data进行归一化和类型转换
 	void fixPower(double* spec, unsigned c, bool hasNormDefault = true) const;
 
-	// 计算谱输出维度的帮助函数
+	/// 帮助函数
+
+	// 计算谱输出维度
 	static unsigned odim(unsigned frameSize, bool roundToPower2);
+
+	static const char* type2Str(KeType type);
+	static KeType str2Type(const char* str);
+
+	static const char* norm2Str(KeNormMode norm);
+	static KeNormMode str2Norm(const char* str);
 
 private:
 	void* rdft_;

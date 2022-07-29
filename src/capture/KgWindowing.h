@@ -10,6 +10,7 @@ public:
 	// prototypes
 	enum KeType
 	{
+		k_unknown,
 		k_hamming,          
 		k_hann,             
 		k_blackman,         // ceoff == 0.42
@@ -31,7 +32,11 @@ public:
 	void porcess(double* data/*inout*/) const;
 
 	// °ïÖúº¯Êý
+
 	static std::function<double(double)> functor(KeType type, ...);
+
+	static const char* type2Str(KeType type);
+	static KeType str2Type(const char* str);
 
 private:
 	std::vector<double> win_;

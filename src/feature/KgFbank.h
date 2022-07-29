@@ -46,6 +46,11 @@ public:
 	// 返回第idx个子带的中心频率(Hz)
 	double fc(unsigned idx) const { return fc_[idx]; }
 
+	/// 帮助函数
+
+	static const char* type2Str(KeType type);
+	static KeType str2Type(const char* str);
+
 private:
 	double toHertz_(double scale); // 将type频率尺度转换为hz
 	double fromHertz_(double hz); // 将hz转换为type频率尺度

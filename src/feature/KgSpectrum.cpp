@@ -92,3 +92,63 @@ unsigned KgSpectrum::odim(unsigned frameSize, bool roundToPower2)
 		frameSize = KtuBitwise<unsigned>::ceilPower2(frameSize);
 	return frameSize / 2 + 1;
 }
+
+
+const char* KgSpectrum::type2Str(KeType type)
+{
+	switch (type) {
+	case k_power:	return "power";
+	case k_log:		return "log";
+	case k_db:		return "db";
+	case k_mag:		return "mag";
+	default:		return "unknown";
+	}
+}
+
+
+KgSpectrum::KeType KgSpectrum::str2Type(const char* str)
+{
+	if (0 == _stricmp(str, type2Str(k_power)))
+		return k_power;
+
+	if (0 == _stricmp(str, type2Str(k_log)))
+		return k_log;
+
+	if (0 == _stricmp(str, type2Str(k_db)))
+		return k_db;
+
+	if (0 == _stricmp(str, type2Str(k_mag)))
+		return k_mag;
+
+	return k_power;
+}
+
+
+const char* KgSpectrum::norm2Str(KeNormMode norm)
+{
+	switch (norm) {
+	case k_norm_none:		return "none";
+	case k_norm_default:	return "default";
+	case k_norm_praat:		return "praat";
+	case k_norm_kaldi:		return "kaldi";
+	default:				return "unknown";
+	}
+}
+
+
+KgSpectrum::KeNormMode KgSpectrum::str2Norm(const char* str)
+{
+	if (0 == _stricmp(str, norm2Str(k_norm_none)))
+		return k_norm_none;
+
+	if (0 == _stricmp(str, norm2Str(k_norm_default)))
+		return k_norm_default;
+
+	if (0 == _stricmp(str, norm2Str(k_norm_praat)))
+		return k_norm_praat;
+
+	if (0 == _stricmp(str, norm2Str(k_norm_kaldi)))
+		return k_norm_kaldi;
+
+	return k_norm_none;
+}

@@ -133,3 +133,37 @@ double KgFbank::calcFilterWeight_(double low, double high, double f)
     auto half = 0.5 * (high - low);
     return f <= low + half ? (f - low) / half : (high - f) / half;
 }
+
+
+const char* KgFbank::type2Str(KeType type)
+{
+    switch (type) {
+    case k_linear:	return "power";
+    case k_log:		return "log";
+    case k_mel:		return "mel";
+    case k_bark:	return "bark";
+    case k_erb:		return "erb";
+    default:		return "unknown";
+    }
+}
+
+
+KgFbank::KeType KgFbank::str2Type(const char* str)
+{
+    if (0 == _stricmp(str, type2Str(k_linear)))
+        return k_linear;
+
+    if (0 == _stricmp(str, type2Str(k_log)))
+        return k_log;
+
+    if (0 == _stricmp(str, type2Str(k_mel)))
+        return k_mel;
+
+    if (0 == _stricmp(str, type2Str(k_bark)))
+        return k_bark;
+
+    if (0 == _stricmp(str, type2Str(k_erb)))
+        return k_erb;
+
+    return k_mel;
+}

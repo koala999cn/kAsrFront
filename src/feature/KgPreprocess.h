@@ -10,8 +10,8 @@ public:
 	enum KeEnergyMode
 	{
 		k_use_energy_none,
-		k_use_energy_raw,
-		k_use_energy_win // 加窗后的能量
+		k_use_energy_raw, // dither & submean之后，preemphasis & windowing之前的能量
+		k_use_energy_win // windowing之后的能量
 	};
 
 	struct KpOptions
