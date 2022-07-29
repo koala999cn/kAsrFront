@@ -32,6 +32,8 @@ public:
 		bool normalize; // 若true，则每个bank的滤波结果将除以bank宽度(Hertz域)
 	};
 
+	KgFbank() = default;
+	KgFbank(KgFbank&& fbank) noexcept;
 	KgFbank(const KpOptions& opts);
 
 	// 返回输入、输出的dim

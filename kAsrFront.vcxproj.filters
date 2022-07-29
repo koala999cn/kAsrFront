@@ -68,6 +68,9 @@
     <ClCompile Include="src\feature\KgFbankPipe.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\feature\KgMfccPipe.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\capture\KcAudioDevice.h">
@@ -149,6 +152,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\KgFbankPipe.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\KgMfccPipe.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

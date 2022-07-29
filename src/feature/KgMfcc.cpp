@@ -16,12 +16,20 @@ namespace kPrivate
 }
 
 
-KgMfcc::KgMfcc(unsigned idim, const KpOptions& opts)
+KgMfcc::KgMfcc(KgMfcc&& mfcc) noexcept
 {
-	idim_ = idim;
+	idim_ = mfcc.idim_;
+	numCeps_ = mfcc.numCeps_;
+	std::swap(dptr_, mfcc.dptr_);
+}
+
+
+KgMfcc::KgMfcc(const KpOptions& opts)
+{
+	idim_ = opts.idim;
 	numCeps_ = opts.numCeps;
 	auto d = new kPrivate::KpMfccPrivate;
-	d->dct = std::make_unique<KgDct>(idim, numCeps_, true); // TODO: 参数控制norm
+	d->dct = std::make_unique<KgDct>(idim_, numCeps_, true); // TODO: 参数控制norm
 	dptr_ = d;
 
 	if (opts.cepsLifter != 0.0) {
@@ -49,7 +57,7 @@ unsigned KgMfcc::odim() const
 }
 
 
-void KgMfcc::process(const double* in, double* out)
+void KgMfcc::process(const double* in, double* out) const
 {
 	auto d = (kPrivate::KpMfccPrivate*)dptr_;
 	d->dct->forward(in, out);

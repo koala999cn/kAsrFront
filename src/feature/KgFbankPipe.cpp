@@ -3,17 +3,6 @@
 #include "base/KtuMath.h"
 
 
-namespace kPrivate
-{
-	static unsigned fft_bins(unsigned frame_size, bool round_to_power2)
-	{
-		if (round_to_power2)
-			frame_size = KtuBitwise<unsigned>::ceilPower2(frame_size);
-		return frame_size / 2 + 1;
-	}
-}
-
-
 KgFbankPipe::KgFbankPipe(const KpOptions& opts)
 	: super_(opts,
 		KgSpectrum::KpOptions{
@@ -25,7 +14,7 @@ KgFbankPipe::KgFbankPipe(const KpOptions& opts)
 		},
 		KgFbank::KpOptions{
 			opts.sampleRate,
-			kPrivate::fft_bins(opts.frameSize, opts.roundToPower2),
+			KgSpectrum::odim(opts.frameSize, opts.roundToPower2),
 			opts.bankType,
 			opts.numBanks,
 			opts.lowFreq,

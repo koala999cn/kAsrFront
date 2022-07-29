@@ -192,6 +192,7 @@
     <ClCompile Include="src\feature\KgFbank.cpp" />
     <ClCompile Include="src\feature\KgFbankPipe.cpp" />
     <ClCompile Include="src\feature\KgMfcc.cpp" />
+    <ClCompile Include="src\feature\KgMfccPipe.cpp" />
     <ClCompile Include="src\feature\KgPreprocess.cpp" />
     <ClCompile Include="src\feature\KgShiftedDelta.cpp" />
     <ClCompile Include="src\feature\KgSpectrogram.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="src\feature\KgFbank.h" />
     <ClInclude Include="src\feature\KgFbankPipe.h" />
     <ClInclude Include="src\feature\KgMfcc.h" />
+    <ClInclude Include="src\feature\KgMfccPipe.h" />
     <ClInclude Include="src\feature\KgPreprocess.h" />
     <ClInclude Include="src\feature\KgShiftedDelta.h" />
     <ClInclude Include="src\feature\KgSpectrogram.h" />

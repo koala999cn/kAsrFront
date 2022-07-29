@@ -6,6 +6,16 @@
 #include "KtuMath.h"
 
 
+KgFbank::KgFbank(KgFbank&& fbank) noexcept
+    : opts_(fbank.opts_)
+    , firstIdx_(std::move(fbank.firstIdx_))
+    , fc_(std::move(fbank.fc_))
+    , weights_(std::move(fbank.weights_))
+{
+    
+}
+
+
 KgFbank::KgFbank(const KpOptions& opts)
     : opts_(opts)
 {

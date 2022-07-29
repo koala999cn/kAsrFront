@@ -25,7 +25,7 @@ public:
 	}
 
 	void process(const double* in, double* out) const {
-		doPipeline_<size()>(in, out);
+		doPipeline<size()>(in, out);
 	}
 
 
@@ -40,19 +40,18 @@ public:
 	template<int I>
 	auto& get() const { return std::get<I>(ops_); }
 
-private:
 
 	template<int N>
-	void doPipeline_(const double* buf, double* out) const {
+	void doPipeline(const double* buf, double* out) const {
 		auto& op = get<N - 1>();
 		assert(op.idim() == get<N - 2>().odim());
 		std::vector<double> temp(op.idim());
-		doPipeline_<N - 1>(buf, temp.data());
+		doPipeline<N - 1>(buf, temp.data());
 		op.process(temp.data(), out);
 	}
 
 	template<>
-	void doPipeline_<1>(const double* buf, double* out) const {
+	void doPipeline<1>(const double* buf, double* out) const {
 		get<0>().process(buf, out);
 	}
 
