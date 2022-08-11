@@ -3,7 +3,6 @@
 #include <vector>
 #include "base/KtuMath.h"
 #include "base/KuStrUtil.h"
-#include "feature/KgPreprocess.h"
 #include "test-util.h"
 
 

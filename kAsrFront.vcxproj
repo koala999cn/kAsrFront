@@ -229,6 +229,7 @@
     <ClInclude Include="src\feature\KtPipeline.h" />
     <ClInclude Include="src\feature\KuCepsUtil.h" />
     <ClInclude Include="src\KgAsrFrontFrame.h" />
+    <ClInclude Include="src\KvFeatPipeline.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

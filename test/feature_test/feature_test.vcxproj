@@ -167,6 +167,7 @@
     <ClCompile Include="fft-test.cpp" />
     <ClCompile Include="mfcc-naive-test.cpp" />
     <ClCompile Include="mfcc-test.cpp" />
+    <ClCompile Include="online-delta-test.cpp" />
     <ClCompile Include="spectrogram-test.cpp" />
     <ClCompile Include="spectrum-test.cpp" />
     <ClCompile Include="test-util.cpp" />

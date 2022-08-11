@@ -157,5 +157,8 @@
     <ClInclude Include="src\feature\KgMfccPipe.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\KvFeatPipeline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
