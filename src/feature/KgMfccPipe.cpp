@@ -32,8 +32,9 @@ KgMfccPipe::KgMfccPipe(const KpOptions& opts)
 		std::vector<double> fbank(pipeline_.get<1>().odim());
 
 		pipeline_.doPipeline<2>(frame, fbank.data()); // 只运算前两个流水线元素
-		KtuMath<double>::applyFloor(fbank.data(), fbank.size(), std::numeric_limits<double>::epsilon());
-		KtuMath<double>::applyLog(fbank.data(), fbank.size());
+		KtuMath<double>::applyFloor(fbank.data(), static_cast<unsigned>(fbank.size()),
+			std::numeric_limits<double>::epsilon());
+		KtuMath<double>::applyLog(fbank.data(), static_cast<unsigned>(fbank.size()));
 
 		std::vector<double> out(odim());
 		pipeline_.get<2>().process(fbank.data(), out.data());
