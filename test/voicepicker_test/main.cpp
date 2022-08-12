@@ -5,9 +5,15 @@
 
 int main(int argc, char const* argv[])
 {
-	KcVoicePicker picker;
-	if(!picker.listen(16000, -1, 0.05, 3,
-		[](KcVoicePicker::KeVoiceEvent id, const KcVoicePicker::KpEventData& data) {
+	KcVoicePicker::KpOptions opts;
+	opts.deviceId = -1;
+	opts.sampleRate = 16000;
+	opts.vadMode = 3;
+	opts.frameTime = 0.05f;
+	opts.minVoiceDuration = 0.3;
+	opts.maxWaitTime = 0.5;
+	KcVoicePicker picker(opts);
+	if(!picker.run([](KcVoicePicker::KeVoiceEvent id, const KcVoicePicker::KpEventData& data) {
 			if (id == KcVoicePicker::KeVoiceEvent::k_voice_frame)
 				printf("-");
 			else if (id == KcVoicePicker::KeVoiceEvent::k_voice_picked)

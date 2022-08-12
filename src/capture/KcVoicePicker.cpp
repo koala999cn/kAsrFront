@@ -8,11 +8,9 @@ namespace kPrivate
 {
 	struct KpVoicePickerImpl_
 	{
+		KcVoicePicker::KpOptions opts;
 		std::unique_ptr<KcAudioDevice> device;
 		std::unique_ptr<KgVoixenVad> vad;
-
-		double minVoiceDuration; // 最小语音时间长度，小于该长度的语音被抛弃，不触发事件
-		double maxWaitTime; // 非语音时间超过该值后，认为当前语音已结束，触发事件
 
 		double voicedTime;
 		std::vector<double> voicedData;
@@ -51,13 +49,13 @@ namespace kPrivate
 
 					dptr_->voicedData.insert(dptr_->voicedData.end(), input, input + frames); // 仍须压入voiced数据栈
 
-					if (streamEndTime - dptr_->unvoicedTime >= dptr_->maxWaitTime) { // 足够时长的unvoiced
+					if (streamEndTime - dptr_->unvoicedTime >= dptr_->opts.maxWaitTime) { // 足够时长的unvoiced
 
 						auto duration = dptr_->unvoicedTime - dptr_->voicedTime;
 						userData.inbuf = dptr_->voicedData.data();
 						userData.frames = static_cast<unsigned>(duration * dptr_->device->sampleRate() + 0.5);
 						userData.streamTime = dptr_->voicedTime;
-						if (!handler_(duration >= dptr_->minVoiceDuration ?
+						if (!handler_(duration >= dptr_->opts.minVoiceDuration ?
 							KcVoicePicker::KeVoiceEvent::k_voice_picked 
 							: KcVoicePicker::KeVoiceEvent::k_voice_discard, userData))
 							return false;
@@ -78,15 +76,32 @@ namespace kPrivate
 }
 
 
-KcVoicePicker::KcVoicePicker(double minVoiceDuration, double maxWaitTime)
+KcVoicePicker::KcVoicePicker(const KpOptions& opts)
 {
 	auto d = new kPrivate::KpVoicePickerImpl_;
 	d->device = std::make_unique<KcAudioDevice>();
-	d->minVoiceDuration = minVoiceDuration;
-	d->maxWaitTime = maxWaitTime;
+	d->opts = opts;
 	d->voicedTime = 0;
 	d->unvoicedTime = 0;
 	dptr_ = d;
+
+	auto sampleRate = opts.sampleRate;
+	if (sampleRate != 8000
+		&& sampleRate != 16000
+		&& sampleRate != 32000
+		&& sampleRate != 48000)
+		sampleRate = 16000;
+
+	auto device = opts.deviceId;
+	if (device == -1)
+		device = d->device->defaultInput();
+	auto frames = unsigned(sampleRate * opts.frameTime);
+
+	KcAudioDevice::KpStreamParameters iparam;
+	iparam.channels = 1; // always mono
+	iparam.deviceId = device;
+	d->device->open(nullptr, &iparam, KcAudioDevice::k_float64, sampleRate, frames);
+	d->vad = std::make_unique<KgVoixenVad>(sampleRate, opts.vadMode);
 }
 
 KcVoicePicker::~KcVoicePicker(void)
@@ -95,32 +110,18 @@ KcVoicePicker::~KcVoicePicker(void)
 }
 
 
-bool KcVoicePicker::listen(unsigned sampleRate, unsigned device, float frameTime, int vadMode, voice_handler handler)
+bool KcVoicePicker::run(voice_handler handler)
 {
-	if (sampleRate != 8000
-		&& sampleRate != 16000
-		&& sampleRate != 32000
-		&& sampleRate != 48000)
-		return false;
-
 	auto d = (kPrivate::KpVoicePickerImpl_*)dptr_;
+
+	if (!d->device->opened())
+		return false;
 
 	if(d->device->running())
 	    stop();
 
-	if (device == -1)
-		device = d->device->defaultInput();
-	unsigned frames = sampleRate * frameTime;
-
-	KcAudioDevice::KpStreamParameters iparam;
-	iparam.channels = 1; // always mono
-	iparam.deviceId = device;
-	if (!d->device->open(nullptr, &iparam, KcAudioDevice::k_float64, sampleRate, frames))
-		return false;
-
-	d->device->pushBack(std::make_shared<kPrivate::KcPickObserver>((kPrivate::KpVoicePickerImpl_*)dptr_, handler));
-
-	d->vad = std::make_unique<KgVoixenVad>(sampleRate, vadMode);
+	d->device->remove<kPrivate::KcPickObserver>();
+	d->device->pushBack(std::make_shared<kPrivate::KcPickObserver>(d, handler));
 
 	return d->device->start();
 }
@@ -146,4 +147,11 @@ void KcVoicePicker::stop()
 	d->device->stop(true);
 	d->device->close();
 	d->device->remove<kPrivate::KcPickObserver>();
+}
+
+
+const KcVoicePicker::KpOptions& KcVoicePicker::options() const
+{
+	auto d = (kPrivate::KpVoicePickerImpl_*)dptr_;
+	return d->opts;
 }
