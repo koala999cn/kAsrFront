@@ -13,8 +13,13 @@ class KtPipeline
 public:
 
 	KtPipeline(OP&&... ops)
-		: ops_(std::make_tuple(std::forward<OP>(ops)...)) {
-	}
+		: ops_(std::make_tuple(std::forward<OP>(ops)...)) {}
+
+	KtPipeline(KtPipeline<OP...>&& pl) 
+		: ops_(std::move(pl.ops_)) {}
+
+	KtPipeline(const KtPipeline<OP...>& pl) 
+		: ops_(pl.ops_) {}
 
 	unsigned idim() const {
 		return get<0>().idim();
