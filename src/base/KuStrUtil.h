@@ -106,8 +106,9 @@ public:
 	// std::string版本的空白字符裁剪
 	static void trim(std::string& str, const char* spaces = k_spaceChars);
 
+    static std::vector<std::string> split(const std::string& full, const std::string& delims, bool skipEempty = true);
 
-    static std::vector<std::string> split(const std::string& full, const std::string& delims, bool skip_empty_token = true);
+	static std::vector<std::string> splitRegex(const std::string& full, const std::string& regex, bool skipEempty = true);
 
 	static std::string join(const std::vector<std::string>& input, char c);
 
@@ -237,7 +238,7 @@ public:
 		std::string str;
 		for (int i = 0; i < max_row_to_show; i++) {
 			str += prefix;
-			str += dump(m[i], max_col_to_show);
+			str += dump(m[i], delim, max_col_to_show);
 			str += '\n';
 		}
 
