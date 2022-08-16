@@ -1,20 +1,29 @@
 #pragma once
+#include <functional>
+#include <vector>
 
 
-// ASR前端框架
+// 1. 根据json配置文件，自动构建ASR前端流水线框架
+// 2. 链接voice-picker和feat-pipeline
 
 class KgAsrFrontFrame
 {
 public:
 
 	// @configFilePath: json格式的配置文件
-	KgAsrFrontFrame(const char* configFilePath);
+	KgAsrFrontFrame(const char* jsonPath);
 	~KgAsrFrontFrame();
 
-	bool run();
+	bool run(std::function<void(std::vector<std::vector<double>>& feats)> h);
 
 	void stop();
 
+	// 输出的特征维度
+	unsigned odim() const;
+
 private:
-	void* dptr_;
+	void* input_;
+	void* pipe_;
+	bool tracking_;
+	std::vector<std::vector<double>> feats_;
 };
