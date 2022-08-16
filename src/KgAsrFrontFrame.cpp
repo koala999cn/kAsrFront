@@ -25,10 +25,17 @@ KgAsrFrontFrame::KgAsrFrontFrame(const char* jsonPath)
 	std::ifstream ifs(jsonPath);
 	if (ifs) {
 		nlohmann::json jobj;
-		ifs >> jobj;
+		try {
+			ifs >> jobj;
+		}
+		catch (...) {
+			;
+		}
+
 		auto r = kPrivate::config(jobj);
 		input_ = r.first;
 		pipe_ = r.second;
+
 	}
 }
 
@@ -43,7 +50,6 @@ KgAsrFrontFrame::~KgAsrFrontFrame()
 
 bool KgAsrFrontFrame::run(std::function<void(std::vector<std::vector<double>>& feats)> h)
 {
-	stop();
 	auto input = (KcVoicePicker*)input_;
 	auto pipe = (KvFeatPipeline*)pipe_;
 	tracking_ = false;
