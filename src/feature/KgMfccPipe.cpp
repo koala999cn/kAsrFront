@@ -42,6 +42,8 @@ KgMfccPipe::KgMfccPipe(const KpOptions& opts)
 		if (prep_->options().useEnergy) {
 			out[0] = energy;
 			pipeline_.get<0>().fixPower(out.data(), 1, false); // 修正能量值
+			KtuMath<double>::applyFloor(out.data(), 1, std::numeric_limits<double>::epsilon());
+			KtuMath<double>::applyLog(out.data(), 1);
 			if (out[0] < energyFloor_)
 				out[0] = energyFloor_;
 		}
