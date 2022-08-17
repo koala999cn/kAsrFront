@@ -8,3 +8,4 @@
 *.vcxproj.filters
 .vcxproj.user
 /old
+/test/frontframe_test/x64/Debug

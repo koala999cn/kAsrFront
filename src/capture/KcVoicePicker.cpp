@@ -144,7 +144,8 @@ void KcVoicePicker::goon()
 void KcVoicePicker::stop()
 {
 	auto d = (kPrivate::KpVoicePickerImpl_*)dptr_;
-	d->device->stop(true);
+	if (d->device->running())
+	    d->device->stop(true);
 	d->device->close();
 	d->device->remove<kPrivate::KcPickObserver>();
 }

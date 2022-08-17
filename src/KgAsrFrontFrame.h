@@ -21,6 +21,10 @@ public:
 	// 输出的特征维度
 	unsigned odim() const;
 
+	void process(const double* buf, unsigned frames) const;
+	
+	auto& features() const { return feats_; }
+
 private:
 	void* input_;
 	void* pipe_;

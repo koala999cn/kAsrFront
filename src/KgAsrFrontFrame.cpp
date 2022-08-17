@@ -23,20 +23,21 @@ KgAsrFrontFrame::KgAsrFrontFrame(const char* jsonPath)
 	: input_(nullptr), pipe_(nullptr)
 {
 	std::ifstream ifs(jsonPath);
-	if (ifs) {
-		nlohmann::json jobj;
-		try {
-			ifs >> jobj;
-		}
-		catch (...) {
-			;
-		}
-
-		auto r = kPrivate::config(jobj);
-		input_ = r.first;
-		pipe_ = r.second;
-
+	nlohmann::json jobj;
+	try {
+		ifs >> jobj;
 	}
+	catch (...) {
+		;
+	}
+
+	auto r = kPrivate::config(jobj);
+	input_ = r.first;
+	pipe_ = r.second;
+
+	r.second->setHandler([this](double* data) {
+		feats_.push_back(std::vector<double>(data, data + odim()));
+		});
 }
 
 
@@ -53,10 +54,6 @@ bool KgAsrFrontFrame::run(std::function<void(std::vector<std::vector<double>>& f
 	auto input = (KcVoicePicker*)input_;
 	auto pipe = (KvFeatPipeline*)pipe_;
 	tracking_ = false;
-
-	pipe->setHandler([this](double* data) {
-		feats_.push_back(std::vector<double>(data, data + odim()));
-		});
 
 	return input->run([h, pipe, this](KcVoicePicker::KeVoiceEvent e, const KcVoicePicker::KpEventData& data) {
 		if (e == KcVoicePicker::KeVoiceEvent::k_voice_discard) {
@@ -93,8 +90,15 @@ bool KgAsrFrontFrame::run(std::function<void(std::vector<std::vector<double>>& f
 
 void KgAsrFrontFrame::stop()
 {
-	assert(input_ != nullptr);
-	((KcVoicePicker*)input_)->stop();
+	if(input_)
+	    ((KcVoicePicker*)input_)->stop();
+}
+
+
+void KgAsrFrontFrame::process(const double* buf, unsigned frames) const
+{
+	auto pipe = (KvFeatPipeline*)pipe_;
+	pipe->process(buf, frames);
 }
 
 
