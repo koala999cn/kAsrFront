@@ -14,15 +14,18 @@ public:
 	KgAsrFrontFrame(const char* jsonPath);
 	~KgAsrFrontFrame();
 
-	bool run(std::function<void(std::vector<std::vector<double>>& feats)> h);
+	using pick_handler = std::function<void(std::vector<std::vector<double>>& feats)>;
+	bool run(pick_handler h, std::function<void(void)> voice_notify);
 
 	void stop();
 
 	// 输出的特征维度
 	unsigned odim() const;
 
+	// for debug
 	void process(const double* buf, unsigned frames) const;
 	
+	// for debug
 	auto& features() const { return feats_; }
 
 private:

@@ -49,27 +49,30 @@ KgAsrFrontFrame::~KgAsrFrontFrame()
 }
 
 
-bool KgAsrFrontFrame::run(std::function<void(std::vector<std::vector<double>>& feats)> h)
+bool KgAsrFrontFrame::run(pick_handler h, std::function<void(void)> voice_notify)
 {
 	auto input = (KcVoicePicker*)input_;
-	auto pipe = (KvFeatPipeline*)pipe_;
 	tracking_ = false;
 
-	return input->run([h, pipe, this](KcVoicePicker::KeVoiceEvent e, const KcVoicePicker::KpEventData& data) {
+	return input->run([voice_notify, h, this](KcVoicePicker::KeVoiceEvent e, const KcVoicePicker::KpEventData& data) {
 		if (e == KcVoicePicker::KeVoiceEvent::k_voice_discard) {
 			feats_.clear();
 			tracking_ = false;
 		}
 		else {
-			if (e == KcVoicePicker::KeVoiceEvent::k_voice_frame)
+			if (e == KcVoicePicker::KeVoiceEvent::k_voice_frame) {
 				tracking_ = true;
+				voice_notify();
+			}
+
+			auto pipe = (KvFeatPipeline*)pipe_;
 
 			if (tracking_)
 				pipe->process(data.inbuf, data.frames);
 
 			if (e == KcVoicePicker::KeVoiceEvent::k_voice_picked) {
 				pipe->flush();
-
+	
 				KgDelta::KpOptions opts;
 				opts.idim = odim();
 				opts.order = 2;
