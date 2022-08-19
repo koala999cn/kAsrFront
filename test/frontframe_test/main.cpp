@@ -56,7 +56,8 @@ void dump_bias(const matrixd& m1, const matrixd& m2)
     }
     meanBias /= m1.size() * m1[0].size();
 
-    printf("mean-bais: %f, max-bais: %f at r=%d, c=%d (%f vs %f)\n", meanBias, maxBias, maxr, maxc, maxVal0, maxVal1);
+    printf("mean-bais: %f, max-bais: %f at r=%d, c=%d (%f vs %f)\n", 
+        meanBias, maxBias, maxr, maxc, maxVal0, maxVal1);
 }
 
 
