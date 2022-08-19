@@ -182,6 +182,7 @@ namespace kPrivate
 		opts.vadMode = 0;
 		opts.minVoiceDuration = 0.3;
 		opts.maxWaitTime = 0.5;
+		opts.aheadPaddingTime = 0.05;
 		opts.frameTime = 0.1f;
 
 		if (jobj.contains("input") && jobj["input"].is_object()) {

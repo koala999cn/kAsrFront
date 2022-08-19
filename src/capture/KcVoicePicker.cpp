@@ -12,10 +12,13 @@ namespace kPrivate
 		std::unique_ptr<KcAudioDevice> device;
 		std::unique_ptr<KgVoixenVad> vad;
 
-		double voicedTime;
+		double voicedTime; // 首个voice帧的时间
 		std::vector<double> voicedData;
 
-		double unvoicedTime;
+		unsigned maxAheadPadding_; // 前缀unvoice最大样本数
+		std::vector<double> aheadPadding_;
+
+		double unvoicedTime; // 连续unvoice帧的起始时间
 	};
 
 	class KcPickObserver : public KcAudioDevice::observer_type
@@ -45,16 +48,23 @@ namespace kPrivate
 				dptr_->voicedData.insert(dptr_->voicedData.end(), input, input + frames);
 			}
 			else {
-				if (!dptr_->voicedData.empty()) { // 处理unvoiced帧
+				if (!dptr_->voicedData.empty()) { // picking状态下的unvoiced帧
 
-					dptr_->voicedData.insert(dptr_->voicedData.end(), input, input + frames); // 仍须压入voiced数据栈
+					dptr_->voicedData.insert(dptr_->voicedData.end(), input, input + frames); // 压入voiced数据栈，作为picking数据的一部分
 
 					if (streamEndTime - dptr_->unvoicedTime >= dptr_->opts.maxWaitTime) { // 足够时长的unvoiced
 
 						auto duration = dptr_->unvoicedTime - dptr_->voicedTime;
+
+						if (duration >= dptr_->opts.minVoiceDuration)
+							// 添加aheadPadding
+							dptr_->voicedData.insert(dptr_->voicedData.begin(), 
+								dptr_->aheadPadding_.begin(), dptr_->aheadPadding_.end());
+
 						userData.inbuf = dptr_->voicedData.data();
-						userData.frames = static_cast<unsigned>(duration * dptr_->device->sampleRate() + 0.5);
+						userData.frames = static_cast<unsigned>(dptr_->voicedData.size());
 						userData.streamTime = dptr_->voicedTime;
+
 						if (!handler_(duration >= dptr_->opts.minVoiceDuration ?
 							KcVoicePicker::KeVoiceEvent::k_voice_picked 
 							: KcVoicePicker::KeVoiceEvent::k_voice_discard, userData))
@@ -62,6 +72,17 @@ namespace kPrivate
 
 						// 重置状态，unvoicedTime不用动
 						dptr_->voicedData.clear();
+						dptr_->aheadPadding_.clear();
+					}
+				}
+				else {
+					// 持续unvoiced状态，积累aheadPadding
+					dptr_->aheadPadding_.insert(dptr_->aheadPadding_.end(),
+						input, input + frames);
+					if (dptr_->aheadPadding_.size() > dptr_->maxAheadPadding_) {
+						auto extra = dptr_->aheadPadding_.size() - dptr_->maxAheadPadding_;
+						dptr_->aheadPadding_.erase(dptr_->aheadPadding_.begin(),
+							dptr_->aheadPadding_.begin() + extra);
 					}
 				}
 			}
@@ -78,19 +99,20 @@ namespace kPrivate
 
 KcVoicePicker::KcVoicePicker(const KpOptions& opts)
 {
-	auto d = new kPrivate::KpVoicePickerImpl_;
-	d->device = std::make_unique<KcAudioDevice>();
-	d->opts = opts;
-	d->voicedTime = 0;
-	d->unvoicedTime = 0;
-	dptr_ = d;
-
 	auto sampleRate = opts.sampleRate;
 	if (sampleRate != 8000
 		&& sampleRate != 16000
 		&& sampleRate != 32000
 		&& sampleRate != 48000)
 		sampleRate = 16000;
+
+	auto d = new kPrivate::KpVoicePickerImpl_;
+	d->device = std::make_unique<KcAudioDevice>();
+	d->opts = opts;
+	d->voicedTime = 0;
+	d->unvoicedTime = 0;
+	d->maxAheadPadding_ = opts.aheadPaddingTime * sampleRate;
+	dptr_ = d;
 
 	auto device = opts.deviceId;
 	if (device == -1)

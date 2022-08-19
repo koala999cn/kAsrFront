@@ -12,6 +12,7 @@ int main(int argc, char const* argv[])
 	opts.frameTime = 0.05f;
 	opts.minVoiceDuration = 0.3;
 	opts.maxWaitTime = 0.5;
+	opts.aheadPaddingTime = 0.05;
 	KcVoicePicker picker(opts);
 	if(!picker.run([](KcVoicePicker::KeVoiceEvent id, const KcVoicePicker::KpEventData& data) {
 			if (id == KcVoicePicker::KeVoiceEvent::k_voice_frame)

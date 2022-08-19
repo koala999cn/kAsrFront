@@ -40,6 +40,8 @@ public:
 		int vadMode;
 		double minVoiceDuration; // default 0.3
 		double maxWaitTime; // default 0.5
+		double aheadPaddingTime; // 在首个voice帧之前，附加前序aheadPaddingTime时间的样本作为picked结果. 
+		                         // default 0.1
 	};
 
 	KcVoicePicker(const KpOptions& opts);
