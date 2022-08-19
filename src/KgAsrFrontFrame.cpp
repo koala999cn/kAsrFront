@@ -4,7 +4,6 @@
 #include <string>
 #include <assert.h>
 #include "nlohmann/json.hpp"
-#include "capture/KcVoicePicker.h"
 #include "capture/KgWindowing.h"
 #include "feature/KgPreprocess.h"
 #include "feature/KgFbankPipe.h"
@@ -15,12 +14,31 @@
 
 namespace kPrivate
 {
-	static std::pair<KcVoicePicker*, KvFeatPipeline*> config(const nlohmann::json& jobj);
+	class KpAsrFrontFrameImpl_
+	{
+	public:
+		KpAsrFrontFrameImpl_(const nlohmann::json& jobj);
+
+	private:
+		static KcVoicePicker* configInput_(const nlohmann::json& jobj);
+		static KgPreprocess::KpOptions defaultPrep_(double sampleRate);
+		static KgPreprocess::KpOptions configPrep_(const nlohmann::json& jobj, double sampleRate);
+		static KgFbankPipe::KpOptions defaultFbank_();
+		static KgFbankPipe::KpOptions configFbank_(const nlohmann::json& jobjs);
+		static KgMfccPipe::KpOptions defaultMfcc_();
+		static KgMfccPipe::KpOptions configMfcc_(const nlohmann::json& jobjs);
+		static KvFeatPipeline* configPipe_(const nlohmann::json& jobj, const KgPreprocess::KpOptions& opts);
+
+	public:
+		std::unique_ptr<KcVoicePicker> picker_;
+		std::unique_ptr<KvFeatPipeline> pipe_;
+		KgPreprocess::KpOptions prepOpts_;
+	};
 }
 
 
 KgAsrFrontFrame::KgAsrFrontFrame(const char* jsonPath)
-	: input_(nullptr), pipe_(nullptr)
+	: dptr_(nullptr), tracking_(false)
 {
 	std::ifstream ifs(jsonPath);
 	nlohmann::json jobj;
@@ -31,47 +49,44 @@ KgAsrFrontFrame::KgAsrFrontFrame(const char* jsonPath)
 		;
 	}
 
-	auto r = kPrivate::config(jobj);
-	input_ = r.first;
-	pipe_ = r.second;
+	auto d = new kPrivate::KpAsrFrontFrameImpl_(jobj);
+	dptr_ = d;
 
-	r.second->setHandler([this](double* data) {
-		feats_.push_back(std::vector<double>(data, data + odim()));
-		});
+	if(d->pipe_)
+		d->pipe_->setHandler([this](double* data) {
+			feats_.push_back(std::vector<double>(data, data + odim()));	});
 }
 
 
 KgAsrFrontFrame::~KgAsrFrontFrame()
 {
 	stop();
-	delete (KcVoicePicker*)input_;
-	delete (KvFeatPipeline*)pipe_;
+	delete (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
 }
 
 
-bool KgAsrFrontFrame::run(pick_handler h, std::function<void(void)> voice_notify)
+bool KgAsrFrontFrame::run(std::function<void(const feat_matrix& feats)> h)
 {
-	auto input = (KcVoicePicker*)input_;
+	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
 	tracking_ = false;
 
-	return input->run([voice_notify, h, this](KcVoicePicker::KeVoiceEvent e, const KcVoicePicker::KpEventData& data) {
+	return d->picker_->run([h, d, this](KcVoicePicker::KeVoiceEvent e, const KcVoicePicker::KpEventData& data) {
+		if (vhandler_ && !vhandler_(e, data))
+			return false;
+
 		if (e == KcVoicePicker::KeVoiceEvent::k_voice_discard) {
 			feats_.clear();
 			tracking_ = false;
 		}
 		else {
-			if (e == KcVoicePicker::KeVoiceEvent::k_voice_frame) {
+			if (e == KcVoicePicker::KeVoiceEvent::k_voice_frame)
 				tracking_ = true;
-				voice_notify();
-			}
-
-			auto pipe = (KvFeatPipeline*)pipe_;
 
 			if (tracking_)
-				pipe->process(data.inbuf, data.frames);
+				d->pipe_->process(data.inbuf, data.frames);
 
 			if (e == KcVoicePicker::KeVoiceEvent::k_voice_picked) {
-				pipe->flush();
+				d->pipe_->flush();
 	
 				KgDelta::KpOptions opts;
 				opts.idim = odim();
@@ -93,21 +108,73 @@ bool KgAsrFrontFrame::run(pick_handler h, std::function<void(void)> voice_notify
 
 void KgAsrFrontFrame::stop()
 {
-	if(input_)
-	    ((KcVoicePicker*)input_)->stop();
+	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	if(d && d->picker_)
+		d->picker_->stop();
 }
 
 
 void KgAsrFrontFrame::process(const double* buf, unsigned frames) const
 {
-	auto pipe = (KvFeatPipeline*)pipe_;
-	pipe->process(buf, frames);
+	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	if (d && d->pipe_)
+		d->pipe_->process(buf, frames);
+}
+
+
+
+unsigned KgAsrFrontFrame::odim() const
+{
+	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	return d->pipe_->odim();
+}
+
+
+double KgAsrFrontFrame::sampleRate() const
+{
+	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	return d->prepOpts_.sampleRate;
+}
+
+
+double KgAsrFrontFrame::frameTime() const
+{
+	return double(frameSize()) / sampleRate();
+}
+
+
+unsigned KgAsrFrontFrame::frameSize() const
+{
+	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	return d->prepOpts_.frameSize;
+}
+
+
+double KgAsrFrontFrame::shiftTime() const
+{
+	return double(shiftSize()) / sampleRate();
+}
+
+
+unsigned KgAsrFrontFrame::shiftSize() const
+{
+	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	return d->prepOpts_.frameShift;
 }
 
 
 namespace kPrivate
 {
-	static KcVoicePicker* config_input(const nlohmann::json& jobj)
+	KpAsrFrontFrameImpl_::KpAsrFrontFrameImpl_(const nlohmann::json& jobj)
+	{
+		picker_.reset(configInput_(jobj));
+		if (picker_) {
+			prepOpts_ = configPrep_(jobj, picker_->options().sampleRate);
+			pipe_.reset(configPipe_(jobj, prepOpts_));
+		}
+	}
+
+	KcVoicePicker* KpAsrFrontFrameImpl_::configInput_(const nlohmann::json& jobj)
 	{
 		KcVoicePicker::KpOptions opts;
 		opts.deviceId = -1; // default input device
@@ -136,7 +203,7 @@ namespace kPrivate
 		return new KcVoicePicker(opts);
 	}
 
-	static KgPreprocess::KpOptions default_prep(double sampleRate)
+	KgPreprocess::KpOptions KpAsrFrontFrameImpl_::defaultPrep_(double sampleRate)
 	{
 		KgPreprocess::KpOptions opts;
 		opts.dither = false;
@@ -152,9 +219,9 @@ namespace kPrivate
 		return opts;
 	}
 
-	static KgPreprocess::KpOptions config_prep(const nlohmann::json& jobj, double sampleRate)
+	KgPreprocess::KpOptions KpAsrFrontFrameImpl_::configPrep_(const nlohmann::json& jobj, double sampleRate)
 	{
-		auto opts = default_prep(sampleRate);
+		auto opts = defaultPrep_(sampleRate);
 
 		if (jobj.contains("prep") && jobj["prep"].is_object()) {
 			auto prep = jobj["prep"];
@@ -199,7 +266,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	static KgFbankPipe::KpOptions default_fbank()
+	KgFbankPipe::KpOptions KpAsrFrontFrameImpl_::defaultFbank_()
 	{
 		KgFbankPipe::KpOptions opts;
 		opts.bankNorm = false;
@@ -215,9 +282,9 @@ namespace kPrivate
 		return opts;
 	}
 
-	static KgFbankPipe::KpOptions config_fbank(const nlohmann::json& jobjs)
+	KgFbankPipe::KpOptions KpAsrFrontFrameImpl_::configFbank_(const nlohmann::json& jobjs)
 	{
-		auto opts = default_fbank();
+		auto opts = defaultFbank_();
 
 		if (jobjs.contains("bank-norm") && jobjs["bank-norm"].is_boolean())
 			opts.bankNorm = jobjs["bank-norm"].get<bool>();
@@ -255,7 +322,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	static KgMfccPipe::KpOptions default_mfcc()
+	KgMfccPipe::KpOptions KpAsrFrontFrameImpl_::defaultMfcc_()
 	{
 		KgMfccPipe::KpOptions opts;
 		opts.numCeps = 13;
@@ -264,9 +331,9 @@ namespace kPrivate
 		return opts;
 	}
 
-	static KgMfccPipe::KpOptions config_mfcc(const nlohmann::json& jobjs)
+	KgMfccPipe::KpOptions KpAsrFrontFrameImpl_::configMfcc_(const nlohmann::json& jobjs)
 	{
-		auto opts = default_mfcc();
+		auto opts = defaultMfcc_();
 
 		if (jobjs.contains("ceps-lifter") && jobjs["ceps-lifter"].is_number())
 			opts.cepsLifter = jobjs["ceps-lifter"].get<double>();
@@ -274,15 +341,15 @@ namespace kPrivate
 		if (jobjs.contains("num-ceps") && jobjs["num-ceps"].is_number_unsigned())
 			opts.numCeps = jobjs["num-ceps"].get<unsigned>();
 
-		auto fbankOpts = config_fbank(jobjs);
+		auto fbankOpts = configFbank_(jobjs);
 		memcpy(&opts, &fbankOpts, sizeof(fbankOpts));
 
 		return opts;
 	}
 
-	static KvFeatPipeline* config_feat(const nlohmann::json& jobj, const KgPreprocess::KpOptions& opts)
+	KvFeatPipeline* KpAsrFrontFrameImpl_::configPipe_(const nlohmann::json& jobj, const KgPreprocess::KpOptions& opts)
 	{
-		KgMfccPipe::KpOptions mfccOpts = default_mfcc();
+		KgMfccPipe::KpOptions mfccOpts;
 		bool makeMfcc(true);
 
 		if (jobj.contains("feat") && jobj["feat"].is_object()) {
@@ -294,13 +361,12 @@ namespace kPrivate
 
 			makeMfcc = _strcmpi(type.c_str(), "mfcc") == 0;
 
-			if (makeMfcc) mfccOpts = config_mfcc(jobj);
-				
-			auto fbankOpts = config_fbank(jobj);
-			memcpy(&mfccOpts, &fbankOpts, sizeof(fbankOpts));
+			if (makeMfcc) mfccOpts = configMfcc_(jobj);
+	
 		}
 		else {
-			auto fbankOpts = default_fbank();
+			mfccOpts = defaultMfcc_();
+			auto fbankOpts = defaultFbank_();
 			memcpy(&mfccOpts, &fbankOpts, sizeof(fbankOpts));
 		}
 
@@ -309,19 +375,4 @@ namespace kPrivate
 		return makeMfcc ? (KvFeatPipeline*)(new KtFeatPipeProxy<KgMfccPipe>(mfccOpts))
 			: (KvFeatPipeline*)(new KtFeatPipeProxy<KgFbankPipe>(mfccOpts));
 	}
-
-	static std::pair<KcVoicePicker*, KvFeatPipeline*> config(const nlohmann::json& jobj)
-	{
-		auto input = config_input(jobj);
-		auto prep = config_prep(jobj, input->options().sampleRate);
-		auto feat = config_feat(jobj, prep);
-
-		return { input, feat };
-	}
-}
-
-
-unsigned KgAsrFrontFrame::odim() const
-{
-	return ((KvFeatPipeline*)pipe_)->odim();
 }
