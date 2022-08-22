@@ -83,7 +83,7 @@ void KgFbank::initWeights_()
 {
     // Hz尺度的采样参数
     KtSampling<double> sanpHertz;
-    sanpHertz.resetn(idim(), 0, opts_.sampleRate / 2, 0); // 兼容kaldi, x0ref取0
+    sanpHertz.resetn(idim() - 1, 0, opts_.sampleRate / 2, 0); // 兼容kaldi, x0ref取0, n取idim - 1
 
     // 目标(type_)尺度的采样参数
     auto lowScale = fromHertz_(opts_.lowFreq);
@@ -96,12 +96,12 @@ void KgFbank::initWeights_()
     weights_.resize(opts_.numBanks);
     for (unsigned bin = 0; bin < opts_.numBanks; bin++) {
 
-        // 计算目标尺度上的this_bin的参数（左边频率，右边频率，中心频率）
+        // 计算当前bin在目标尺度上的规格（左边频率，右边频率，中心频率）
         auto fl = sanpScale.indexToX(bin);
         auto fc = sanpScale.indexToX(bin + 1);
         auto fr = sanpScale.indexToX(bin + 2);
 
-        // 计算this_bin对应的频点范围
+        // 计算当前bin的频点范围
         auto flhz = toHertz_(fl); 
         auto frhz = toHertz_(fr);
         auto lowIdx = sanpHertz.xToHighIndex(flhz);
@@ -111,7 +111,7 @@ void KgFbank::initWeights_()
         firstIdx_[bin] = lowIdx;
         fc_[bin] = toHertz_(fc);
 
-        // 计算this_bin的权值
+        // 计算当前bin的权值
         weights_[bin].clear();
         if (lowIdx <= highIdx) {
             // 计算当前bin的权值数组（目标尺度上的三角滤波）
