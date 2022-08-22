@@ -233,6 +233,12 @@ public:
 
     // 对x进行缩放，确保absMax(x) = val
     static void scaleTo(KREAL x[], unsigned n, KREAL val);
+    
+    // x[i] *= i/(n-1)
+    static void fadeIn(KREAL x[], unsigned n);
+
+    // x[i] *= (n-i-1)/(n-1)
+    static void fadeOut(KREAL x[], unsigned n);
 
     ////////////////////////////////////////////////////////////////////////
 
@@ -947,4 +953,20 @@ void KtuMath<KREAL>::linspace(KREAL left, KREAL right, KREAL x0ref, KREAL* out, 
 
     for (unsigned i = 0; i < olen; i++)
         out[i] = left + (x0ref + i) * dx;
+}
+
+
+template<typename KREAL>
+void KtuMath<KREAL>::fadeIn(KREAL x[], unsigned n)
+{
+    for (unsigned i = 0; i < n; i++)
+        x[i] *= KREAL(i) / KREAL(n - 1);
+}
+
+
+template<typename KREAL>
+void KtuMath<KREAL>::fadeOut(KREAL x[], unsigned n)
+{
+    for (unsigned i = 0; i < n; i++)
+        x[i] *= KREAL(n - i - 1) / KREAL(n - 1);
 }

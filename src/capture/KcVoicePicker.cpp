@@ -1,6 +1,7 @@
 #include "KcVoicePicker.h"
 #include "KcAudioDevice.h"
 #include "KgVoixenVad.h"
+#include "KtuMath.h"
 #include <assert.h>
 
 
@@ -56,10 +57,14 @@ namespace kPrivate
 
 						auto duration = dptr_->unvoicedTime - dptr_->voicedTime;
 
-						if (duration >= dptr_->opts.minVoiceDuration)
+						if (duration >= dptr_->opts.minVoiceDuration) {
+							// ×ö¸öfade-in
+							KtuMath<double>::fadeIn(dptr_->aheadPadding_.data(), dptr_->aheadPadding_.size());
+
 							// Ìí¼ÓaheadPadding
-							dptr_->voicedData.insert(dptr_->voicedData.begin(), 
+							dptr_->voicedData.insert(dptr_->voicedData.begin(),
 								dptr_->aheadPadding_.begin(), dptr_->aheadPadding_.end());
+						}
 
 						userData.inbuf = dptr_->voicedData.data();
 						userData.frames = static_cast<unsigned>(dptr_->voicedData.size());
