@@ -14,10 +14,10 @@
 
 namespace kPrivate
 {
-	class KpAsrFrontFrameImpl_
+	class KgAsrFrontFrameImpl_
 	{
 	public:
-		KpAsrFrontFrameImpl_(const nlohmann::json& jobj);
+		KgAsrFrontFrameImpl_(const nlohmann::json& jobj);
 
 	private:
 		static KcVoicePicker* configInput_(const nlohmann::json& jobj);
@@ -49,7 +49,7 @@ KgAsrFrontFrame::KgAsrFrontFrame(const char* jsonPath)
 		;
 	}
 
-	auto d = new kPrivate::KpAsrFrontFrameImpl_(jobj);
+	auto d = new kPrivate::KgAsrFrontFrameImpl_(jobj);
 	dptr_ = d;
 
 	if(d->pipe_)
@@ -61,44 +61,32 @@ KgAsrFrontFrame::KgAsrFrontFrame(const char* jsonPath)
 KgAsrFrontFrame::~KgAsrFrontFrame()
 {
 	stop();
-	delete (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	delete (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 }
 
 
 bool KgAsrFrontFrame::run(std::function<void(const feat_matrix& feats)> h)
 {
-	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
-	tracking_ = false;
+	auto d = (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 
 	return d->picker_->run([h, d, this](KcVoicePicker::KeVoiceEvent e, const KcVoicePicker::KpEventData& data) {
 		if (vhandler_ && !vhandler_(e, data))
 			return false;
 
-		if (e == KcVoicePicker::KeVoiceEvent::k_voice_discard) {
-			feats_.clear();
-			tracking_ = false;
-		}
-		else {
-			if (e == KcVoicePicker::KeVoiceEvent::k_voice_frame)
-				tracking_ = true;
-
-			if (tracking_)
-				d->pipe_->process(data.inbuf, data.frames);
-
-			if (e == KcVoicePicker::KeVoiceEvent::k_voice_picked) {
-				d->pipe_->flush();
+		if (e == KcVoicePicker::KeVoiceEvent::k_voice_picked) {
+			assert(feats_.empty());
+			d->pipe_->process(data.inbuf, data.frames);
+			//d->pipe_->flush();
 	
-				KgDelta::KpOptions opts;
-				opts.idim = odim();
-				opts.order = 2;
-				opts.window = 2;
-				KgDelta delta(opts);
-				auto feats = delta.compute(feats_);
-				feats_.clear();
-				tracking_ = false;
+			KgDelta::KpOptions opts;
+			opts.idim = odim();
+			opts.order = 2;
+			opts.window = 2;
+			KgDelta delta(opts);
+			auto feats = delta.compute(feats_);
+			feats_.clear();
 
-				h(feats);
-			}
+			h(feats);
 		}
 
 		return true;
@@ -108,7 +96,7 @@ bool KgAsrFrontFrame::run(std::function<void(const feat_matrix& feats)> h)
 
 void KgAsrFrontFrame::stop()
 {
-	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	auto d = (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 	if(d && d->picker_)
 		d->picker_->stop();
 }
@@ -116,7 +104,7 @@ void KgAsrFrontFrame::stop()
 
 void KgAsrFrontFrame::process(const double* buf, unsigned frames) const
 {
-	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	auto d = (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 	if (d && d->pipe_)
 		d->pipe_->process(buf, frames);
 }
@@ -125,14 +113,14 @@ void KgAsrFrontFrame::process(const double* buf, unsigned frames) const
 
 unsigned KgAsrFrontFrame::odim() const
 {
-	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	auto d = (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 	return d->pipe_->odim();
 }
 
 
 double KgAsrFrontFrame::sampleRate() const
 {
-	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	auto d = (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 	return d->prepOpts_.sampleRate;
 }
 
@@ -145,7 +133,7 @@ double KgAsrFrontFrame::frameTime() const
 
 unsigned KgAsrFrontFrame::frameSize() const
 {
-	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	auto d = (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 	return d->prepOpts_.frameSize;
 }
 
@@ -158,14 +146,14 @@ double KgAsrFrontFrame::shiftTime() const
 
 unsigned KgAsrFrontFrame::shiftSize() const
 {
-	auto d = (kPrivate::KpAsrFrontFrameImpl_*)dptr_;
+	auto d = (kPrivate::KgAsrFrontFrameImpl_*)dptr_;
 	return d->prepOpts_.frameShift;
 }
 
 
 namespace kPrivate
 {
-	KpAsrFrontFrameImpl_::KpAsrFrontFrameImpl_(const nlohmann::json& jobj)
+	KgAsrFrontFrameImpl_::KgAsrFrontFrameImpl_(const nlohmann::json& jobj)
 	{
 		picker_.reset(configInput_(jobj));
 		if (picker_) {
@@ -174,7 +162,7 @@ namespace kPrivate
 		}
 	}
 
-	KcVoicePicker* KpAsrFrontFrameImpl_::configInput_(const nlohmann::json& jobj)
+	KcVoicePicker* KgAsrFrontFrameImpl_::configInput_(const nlohmann::json& jobj)
 	{
 		KcVoicePicker::KpOptions opts;
 		opts.deviceId = -1; // default input device
@@ -204,7 +192,7 @@ namespace kPrivate
 		return new KcVoicePicker(opts);
 	}
 
-	KgPreprocess::KpOptions KpAsrFrontFrameImpl_::defaultPrep_(double sampleRate)
+	KgPreprocess::KpOptions KgAsrFrontFrameImpl_::defaultPrep_(double sampleRate)
 	{
 		KgPreprocess::KpOptions opts;
 		opts.dither = false;
@@ -220,7 +208,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	KgPreprocess::KpOptions KpAsrFrontFrameImpl_::configPrep_(const nlohmann::json& jobj, double sampleRate)
+	KgPreprocess::KpOptions KgAsrFrontFrameImpl_::configPrep_(const nlohmann::json& jobj, double sampleRate)
 	{
 		auto opts = defaultPrep_(sampleRate);
 
@@ -267,7 +255,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	KgFbankPipe::KpOptions KpAsrFrontFrameImpl_::defaultFbank_()
+	KgFbankPipe::KpOptions KgAsrFrontFrameImpl_::defaultFbank_()
 	{
 		KgFbankPipe::KpOptions opts;
 		opts.bankNorm = false;
@@ -283,7 +271,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	KgFbankPipe::KpOptions KpAsrFrontFrameImpl_::configFbank_(const nlohmann::json& jobjs)
+	KgFbankPipe::KpOptions KgAsrFrontFrameImpl_::configFbank_(const nlohmann::json& jobjs)
 	{
 		auto opts = defaultFbank_();
 
@@ -323,7 +311,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	KgMfccPipe::KpOptions KpAsrFrontFrameImpl_::defaultMfcc_()
+	KgMfccPipe::KpOptions KgAsrFrontFrameImpl_::defaultMfcc_()
 	{
 		KgMfccPipe::KpOptions opts;
 		opts.numCeps = 13;
@@ -332,7 +320,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	KgMfccPipe::KpOptions KpAsrFrontFrameImpl_::configMfcc_(const nlohmann::json& jobjs)
+	KgMfccPipe::KpOptions KgAsrFrontFrameImpl_::configMfcc_(const nlohmann::json& jobjs)
 	{
 		auto opts = defaultMfcc_();
 
@@ -348,7 +336,7 @@ namespace kPrivate
 		return opts;
 	}
 
-	KvFeatPipeline* KpAsrFrontFrameImpl_::configPipe_(const nlohmann::json& jobj, const KgPreprocess::KpOptions& opts)
+	KvFeatPipeline* KgAsrFrontFrameImpl_::configPipe_(const nlohmann::json& jobj, const KgPreprocess::KpOptions& opts)
 	{
 		KgMfccPipe::KpOptions mfccOpts;
 		bool makeMfcc(true);
